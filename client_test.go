@@ -42,14 +42,14 @@ var _ = Describe("Account api resource client", func() {
 
 				resource := resources.NewAccount(id, organisationID, map[string]interface{}{})
 
-				client.Create(resource)
+				client.CreateAccount(resource)
 			})
 			It("builds a request with resource endpoint", func() {
 				httpClientMock.EXPECT().Do(test.IsRequestURL(fmt.Sprintf("%s/organisation/accounts", baseURL))).Return(nil, errors.New("fake")).Times(1)
 
 				resource := resources.NewAccount(id, organisationID, map[string]interface{}{})
 
-				client.Create(resource)
+				client.CreateAccount(resource)
 			})
 			It("builds a request with dataContainer struct data", func() {
 				resource := test.BuildBasicAccountResource(id, organisationID)
@@ -62,7 +62,7 @@ var _ = Describe("Account api resource client", func() {
 				)
 				httpClientMock.EXPECT().Do(test.IsRequestBody(req)).Return(nil, errors.New("fake")).Times(1)
 
-				client.Create(resource)
+				client.CreateAccount(resource)
 			})
 			Context("When getting succesful response", func() {
 				It("returns resourceContainer struct as response data", func() {
@@ -78,7 +78,7 @@ var _ = Describe("Account api resource client", func() {
 						nil,
 					).Times(1)
 
-					response, err := client.Create(resource)
+					response, err := client.CreateAccount(resource)
 
 					Expect(err).To(BeNil())
 					Expect(response.Data.ID).To(Equal(id))

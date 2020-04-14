@@ -23,8 +23,7 @@ func NewForm3Client(apiBaseURL string, httpClient HTTPClient) *Form3Client {
 	return &Form3Client{apiBaseURL, httpClient}
 }
 
-func (fc Form3Client) Create(resource resources.Resource) (*resources.DataContainer, error) {
-	endpoint := "organisation/accounts"
+func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.DataContainer, error) {
 	data := resources.NewDataContainer(resource)
 	dataBt, err := json.Marshal(data)
 	if err != nil {
@@ -32,7 +31,7 @@ func (fc Form3Client) Create(resource resources.Resource) (*resources.DataContai
 	}
 	req, _ := http.NewRequest(
 		http.MethodPost,
-		fmt.Sprintf("%s/%s", fc.url, endpoint),
+		fc.buildRequestURL("accounts"),
 		bytes.NewBuffer(dataBt),
 	)
 
@@ -45,4 +44,9 @@ func (fc Form3Client) Create(resource resources.Resource) (*resources.DataContai
 	var responseData resources.DataContainer
 	err = json.Unmarshal(body, &responseData)
 	return &responseData, nil
+}
+
+func (fc Form3Client) buildRequestURL(resource string) string {
+	endpoint := "organisation/accounts"
+	return fmt.Sprintf("%s/%s", fc.url, endpoint)
 }
