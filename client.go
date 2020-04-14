@@ -25,14 +25,14 @@ func NewForm3Client(apiBaseURL string, httpClient HTTPClient) *Form3Client {
 
 func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.DataContainer, error) {
 	data := resources.NewDataContainer(resource)
-	dataBt, err := json.Marshal(data)
+	dataB, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
 	req, _ := http.NewRequest(
 		http.MethodPost,
 		fc.buildRequestURL("accounts"),
-		bytes.NewBuffer(dataBt),
+		bytes.NewBuffer(dataB),
 	)
 
 	resp, err := fc.httpClient.Do(req)

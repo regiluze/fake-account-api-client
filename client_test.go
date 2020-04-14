@@ -52,22 +52,22 @@ var _ = Describe("Account api resource client", func() {
 				client.CreateAccount(resource)
 			})
 			It("builds a request with dataContainer struct data", func() {
-				resource := test.BuildBasicAccountResource(id, organisationID)
-				data := resources.NewDataContainer(resource)
-				dataBt, _ := json.Marshal(data)
+				account := test.BuildBasicAccountResource(id, organisationID)
+				data := resources.NewDataContainer(account)
+				dataB, _ := json.Marshal(data)
 				req, _ := http.NewRequest(
 					"POST",
 					fmt.Sprintf("%s/organisation/accounts", baseURL),
-					bytes.NewBuffer(dataBt),
+					bytes.NewBuffer(dataB),
 				)
 				httpClientMock.EXPECT().Do(test.IsRequestBody(req)).Return(nil, errors.New("fake")).Times(1)
 
-				client.CreateAccount(resource)
+				client.CreateAccount(account)
 			})
 			Context("When getting succesful response", func() {
 				It("returns resourceContainer struct as response data", func() {
-					resource := test.BuildBasicAccountResource(id, organisationID)
-					data := resources.NewDataContainer(resource)
+					account := test.BuildBasicAccountResource(id, organisationID)
+					data := resources.NewDataContainer(account)
 					dataBt, _ := json.Marshal(data)
 					expectedResponseBody := ioutil.NopCloser(bytes.NewReader(dataBt))
 					httpClientMock.EXPECT().Do(gomock.Any()).Return(
@@ -78,7 +78,7 @@ var _ = Describe("Account api resource client", func() {
 						nil,
 					).Times(1)
 
-					response, err := client.CreateAccount(resource)
+					response, err := client.CreateAccount(account)
 
 					Expect(err).To(BeNil())
 					Expect(response.Data.ID).To(Equal(id))
