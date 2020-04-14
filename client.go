@@ -31,7 +31,7 @@ func (fc Form3Client) Create(resource resources.Resource) (*resources.DataContai
 		return nil, err
 	}
 	req, _ := http.NewRequest(
-		"POST",
+		http.MethodPost,
 		fmt.Sprintf("%s/%s", fc.url, endpoint),
 		bytes.NewBuffer(dataBt),
 	)
