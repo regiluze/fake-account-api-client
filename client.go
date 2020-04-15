@@ -10,6 +10,8 @@ import (
 	"./resources"
 )
 
+var basicErrorAPIStatusCodes = [...]int{401, 403, 404, 405, 406, 409, 429, 500, 502, 503, 504}
+
 // ErrBadRequest is returned when getting a 400 status code from server.
 type ErrBadRequest struct {
 	verb      string
@@ -81,33 +83,11 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode == http.StatusInternalServerError ||
-		resp.StatusCode == http.StatusBadGateway ||
-		resp.StatusCode == http.StatusServiceUnavailable ||
-		resp.StatusCode == http.StatusGatewayTimeout ||
-		resp.StatusCode == http.StatusUnauthorized ||
-		resp.StatusCode == http.StatusForbidden ||
-		resp.StatusCode == http.StatusNotFound ||
-		resp.StatusCode == http.StatusMethodNotAllowed ||
-		resp.StatusCode == http.StatusNotAcceptable ||
-		resp.StatusCode == http.StatusConflict ||
-		resp.StatusCode == http.StatusTooManyRequests {
-		return nil, ErrFromServer{http.MethodPost, url, resp.StatusCode}
+	if err := fc.isResponseStatusCodeAnError(resp, url); err != nil {
+		return nil, err
 	}
-	if resp.StatusCode == http.StatusBadRequest {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		var errorData resources.BadRequestData
-		if err := json.Unmarshal(body, &errorData); err != nil {
-			return nil, err
-		}
-		return nil, ErrBadRequest{http.MethodPost, errorData}
-
-	}
-	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
 	// TODO test for this
 	//if err != nil {
 	//	return nil, err
@@ -117,6 +97,30 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 		return nil, err
 	}
 	return &responseData, nil
+}
+
+func (fc Form3Client) isResponseStatusCodeAnError(resp *http.Response, url string) error {
+	for _, errorStatusCode := range basicErrorAPIStatusCodes {
+		if errorStatusCode == resp.StatusCode {
+			return ErrFromServer{http.MethodPost, url, resp.StatusCode}
+		}
+	}
+	if resp.StatusCode == http.StatusBadRequest {
+		return fc.buildBadRequestError(resp)
+	}
+	return nil
+}
+
+func (fc Form3Client) buildBadRequestError(resp *http.Response) error {
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	var errorData resources.BadRequestData
+	if err := json.Unmarshal(body, &errorData); err != nil {
+		return err
+	}
+	return ErrBadRequest{http.MethodPost, errorData}
 }
 
 func (fc Form3Client) buildRequestURL(resource string) string {
