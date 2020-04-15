@@ -84,6 +84,102 @@ var _ = Describe("Account api resource client", func() {
 					Expect(response.Data.ID).To(Equal(id))
 				})
 			})
+			Context("When something goes wrong", func() {
+				It("returns an error when http client return an error", func() {
+					account := test.BuildBasicAccountResource(id, organisationID)
+					httpClientMock.EXPECT().Do(gomock.Any()).Return(
+						nil,
+						errors.New("error"),
+					).Times(1)
+
+					response, err := client.CreateAccount(account)
+
+					Expect(response).To(BeNil())
+					Expect(err).NotTo(BeNil())
+				})
+				It("returns an error when response body unmarshal fails", func() {
+					account := test.BuildBasicAccountResource(id, organisationID)
+					json := `{}}`
+					expectedResponseBody := ioutil.NopCloser(bytes.NewReader([]byte(json)))
+					httpClientMock.EXPECT().Do(gomock.Any()).Return(
+						&http.Response{
+							StatusCode: 201,
+							Body:       expectedResponseBody,
+						},
+						nil,
+					).Times(1)
+
+					response, err := client.CreateAccount(account)
+
+					Expect(response).To(BeNil())
+					Expect(err).NotTo(BeNil())
+				})
+			})
+			Context("When getting error response from the server", func() {
+				It("returns an error when server responses an error 50X", func() {
+					account := test.BuildBasicAccountResource(id, organisationID)
+					httpClientMock.EXPECT().Do(gomock.Any()).Return(
+						&http.Response{
+							StatusCode: 500,
+						},
+						nil,
+					).Times(1)
+
+					response, err := client.CreateAccount(account)
+
+					Expect(response).To(BeNil())
+					Expect(err).Should(
+						MatchError(
+							ErrFromServer{"POST",
+								fmt.Sprintf("%s/organisation/accounts", baseURL),
+								500}),
+					)
+				})
+				It("returns an error when server responses an error 40X", func() {
+					account := test.BuildBasicAccountResource(id, organisationID)
+					httpClientMock.EXPECT().Do(gomock.Any()).Return(
+						&http.Response{
+							StatusCode: 403,
+						},
+						nil,
+					).Times(1)
+
+					response, err := client.CreateAccount(account)
+
+					Expect(response).To(BeNil())
+					Expect(err).Should(
+						MatchError(
+							ErrFromServer{"POST",
+								fmt.Sprintf("%s/organisation/accounts", baseURL),
+								403}),
+					)
+				})
+				It("returns an error with information to indentify the problem when server responses an error 400", func() {
+					account := test.BuildBasicAccountResource(id, organisationID)
+					errorData := resources.BadRequestData{
+						ErrorCode:    400,
+						ErrorMessage: "mandatory",
+					}
+					json := `{"error_code": 400, "error_message": "mandatory"}`
+					expectedResponseBody := ioutil.NopCloser(bytes.NewReader([]byte(json)))
+					httpClientMock.EXPECT().Do(gomock.Any()).Return(
+						&http.Response{
+							StatusCode: 400,
+							Body:       expectedResponseBody,
+						},
+						nil,
+					).Times(1)
+
+					response, err := client.CreateAccount(account)
+
+					Expect(response).To(BeNil())
+					Expect(err).Should(
+						MatchError(
+							ErrBadRequest{"POST",
+								errorData}),
+					)
+				})
+			})
 		})
 	})
 })
