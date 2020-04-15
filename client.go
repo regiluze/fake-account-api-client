@@ -10,7 +10,19 @@ import (
 	"./resources"
 )
 
-var basicErrorAPIStatusCodes = [...]int{401, 403, 404, 405, 406, 409, 429, 500, 502, 503, 504}
+var basicErrorAPIStatusCodes = [...]int{401, 403, 405, 406, 409, 429, 500, 502, 503, 504}
+
+// ErrNotFound is returned when getting a 404 status code from server.
+type ErrNotFound struct {
+	url string
+}
+
+func (e ErrNotFound) Error() string {
+	return fmt.Sprintf(
+		"Resource or endpoint not exists: %s",
+		e.url,
+	)
+}
 
 // ErrBadRequest is returned when getting a 400 status code from server.
 type ErrBadRequest struct {
@@ -83,7 +95,7 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 	if err != nil {
 		return nil, err
 	}
-	if err := fc.isResponseStatusCodeAnError(resp, url); err != nil {
+	if err := fc.isResponseStatusCodeAnError(resp, http.MethodPost, url); err != nil {
 		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
@@ -99,14 +111,44 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 	return &responseData, nil
 }
 
-func (fc Form3Client) isResponseStatusCodeAnError(resp *http.Response, url string) error {
-	for _, errorStatusCode := range basicErrorAPIStatusCodes {
-		if errorStatusCode == resp.StatusCode {
-			return ErrFromServer{http.MethodPost, url, resp.StatusCode}
-		}
+func (fc Form3Client) FetchAccount(id string) (*resources.DataContainer, error) {
+	url := fc.buildRequestURL("accounts", id)
+	req, _ := http.NewRequest(
+		http.MethodGet,
+		url,
+		nil,
+	)
+	resp, err := fc.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if err := fc.isResponseStatusCodeAnError(resp, http.MethodGet, url); err != nil {
+		return nil, err
+	}
+	body, _ := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	// TODO test for this
+	//if err != nil {
+	//	return nil, err
+	//}
+	var responseData resources.DataContainer
+	if err := json.Unmarshal(body, &responseData); err != nil {
+		return nil, err
+	}
+	return &responseData, nil
+}
+
+func (fc Form3Client) isResponseStatusCodeAnError(resp *http.Response, verb, url string) error {
+	if resp.StatusCode == http.StatusNotFound {
+		return ErrNotFound{url}
 	}
 	if resp.StatusCode == http.StatusBadRequest {
 		return fc.buildBadRequestError(resp)
+	}
+	for _, errorStatusCode := range basicErrorAPIStatusCodes {
+		if errorStatusCode == resp.StatusCode {
+			return ErrFromServer{verb, url, resp.StatusCode}
+		}
 	}
 	return nil
 }
@@ -123,7 +165,12 @@ func (fc Form3Client) buildBadRequestError(resp *http.Response) error {
 	return ErrBadRequest{http.MethodPost, errorData}
 }
 
-func (fc Form3Client) buildRequestURL(resource string) string {
+// TODO solve the resource endpoint problem
+func (fc Form3Client) buildRequestURL(paths ...string) string {
 	endpoint := "organisation/accounts"
-	return fmt.Sprintf("%s/%s", fc.url, endpoint)
+	idPath := ""
+	if len(paths) > 1 {
+		idPath = fmt.Sprintf("/%s", paths[1])
+	}
+	return fmt.Sprintf("%s/%s%s", fc.url, endpoint, idPath)
 }
