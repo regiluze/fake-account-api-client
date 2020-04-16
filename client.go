@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"./resources"
 )
@@ -84,21 +86,26 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 	if err != nil {
 		return nil, err
 	}
-	url := fc.buildRequestURL("accounts")
+	url := fc.buildRequestURL(map[string]string{}, "accounts")
 	req, _ := http.NewRequest(
 		http.MethodPost,
 		url,
 		bytes.NewBuffer(dataB),
 	)
+	req.Header.Set("Accept", "application/vnd.api+json")
+	req.Header.Set("Content-Type", "application/vnd.api+json")
+	fmt.Println(">>>>>> verb ", req.Method)
 
 	resp, err := fc.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(">>>>>> status code ", resp.StatusCode)
 	if err := fc.isResponseStatusCodeAnError(resp, http.MethodPost, url); err != nil {
 		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(">>>>>> body ", string(body))
 	defer resp.Body.Close()
 	// TODO test for this
 	//if err != nil {
@@ -112,12 +119,14 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 }
 
 func (fc Form3Client) FetchAccount(id string) (*resources.DataContainer, error) {
-	url := fc.buildRequestURL("accounts", id)
+	url := fc.buildRequestURL(map[string]string{}, "accounts", id)
 	req, _ := http.NewRequest(
 		http.MethodGet,
 		url,
 		nil,
 	)
+	req.Header.Set("Accept", "application/vnd.api+json")
+	req.Header.Set("Content-Type", "application/vnd.api+json")
 	resp, err := fc.httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -136,6 +145,26 @@ func (fc Form3Client) FetchAccount(id string) (*resources.DataContainer, error) 
 		return nil, err
 	}
 	return &responseData, nil
+}
+
+func (fc Form3Client) DeleteAccount(id string, version int) error {
+	url := fc.buildRequestURL(
+		map[string]string{
+			"version": strconv.Itoa(version),
+		}, "accounts", id)
+	req, _ := http.NewRequest(
+		http.MethodDelete,
+		url,
+		nil,
+	)
+	resp, err := fc.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	if err := fc.isResponseStatusCodeAnError(resp, http.MethodDelete, url); err != nil {
+		return err
+	}
+	return err
 }
 
 func (fc Form3Client) isResponseStatusCodeAnError(resp *http.Response, verb, url string) error {
@@ -166,11 +195,19 @@ func (fc Form3Client) buildBadRequestError(resp *http.Response) error {
 }
 
 // TODO solve the resource endpoint problem
-func (fc Form3Client) buildRequestURL(paths ...string) string {
+func (fc Form3Client) buildRequestURL(parameters map[string]string, paths ...string) string {
 	endpoint := "organisation/accounts"
 	idPath := ""
+	queryParams := ""
 	if len(paths) > 1 {
 		idPath = fmt.Sprintf("/%s", paths[1])
 	}
-	return fmt.Sprintf("%s/%s%s", fc.url, endpoint, idPath)
+	if len(parameters) > 0 {
+		flatParams := []string{}
+		for name, value := range parameters {
+			flatParams = append(flatParams, fmt.Sprintf("%s=%s", name, value))
+		}
+		queryParams = fmt.Sprintf("?%s", strings.Join(flatParams, "&"))
+	}
+	return fmt.Sprintf("%s/%s%s%s", fc.url, endpoint, idPath, queryParams)
 }
