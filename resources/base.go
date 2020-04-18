@@ -1,5 +1,11 @@
 package resources
 
+type ResourceName string
+
+const (
+	Account ResourceName = "account"
+)
+
 type DataContainer struct {
 	Data  Resource          `json:"data"`
 	Links map[string]string `json:"links,omitempty"`

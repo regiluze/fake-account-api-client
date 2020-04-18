@@ -55,3 +55,22 @@ func (i *isRequestBody) Matches(x interface{}) bool {
 func (i *isRequestBody) String() string {
 	return fmt.Sprintf("Body: %s", i.r.Body)
 }
+
+type isRequestHeaderValues struct{ r *http.Request }
+
+// Matcher to check if http Request header has correct accept and content-type
+func IsRequestHeaderValues(r *http.Request) gomock.Matcher {
+	return &isRequestHeaderValues{r}
+}
+
+func (i *isRequestHeaderValues) Matches(x interface{}) bool {
+	req := x.(*http.Request)
+	fmt.Println(">>>>> expected headers ", req.Header)
+	fmt.Println(">>>>> comming headers ", i.r.Header)
+	return req.Header["Accept"][0] == i.r.Header["Accept"][0] &&
+		req.Header["Content-Type"][0] == i.r.Header["Content-Type"][0]
+}
+
+func (i *isRequestHeaderValues) String() string {
+	return fmt.Sprintf("Headers : %s", i.r.Header)
+}

@@ -13,7 +13,14 @@ import (
 	"./resources"
 )
 
-var basicErrorAPIStatusCodes = [...]int{401, 403, 405, 406, 409, 429, 500, 502, 503, 504}
+var (
+	emptyID                  = ""
+	emptyParameters          = map[string]string{}
+	basicErrorAPIStatusCodes = [...]int{401, 403, 405, 406, 409, 429, 500, 502, 503, 504}
+	resourcesEndpointsMap    = map[resources.ResourceName]string{
+		resources.Account: "organisation/accounts",
+	}
+)
 
 // ErrNotFound is returned when getting a 404 status code from server.
 type ErrNotFound struct {
@@ -73,12 +80,18 @@ type HTTPClient interface {
 }
 
 type Form3Client struct {
-	url        string
-	httpClient HTTPClient
+	baseURL           string
+	headerAccept      string
+	headerContentType string
+	httpClient        HTTPClient
 }
 
-func NewForm3Client(apiBaseURL string, httpClient HTTPClient) *Form3Client {
-	return &Form3Client{apiBaseURL, httpClient}
+func NewForm3Client(apiBaseURL string, httpClient HTTPClient, headerAccept, headerContentType string) *Form3Client {
+	return &Form3Client{
+		baseURL:           apiBaseURL,
+		httpClient:        httpClient,
+		headerAccept:      headerAccept,
+		headerContentType: headerContentType}
 }
 
 func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.DataContainer, error) {
@@ -87,7 +100,7 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 	if err != nil {
 		return nil, err
 	}
-	url := fc.buildRequestURL(map[string]string{}, "accounts")
+	url := fc.buildRequestURL(resources.Account, emptyID, emptyParameters)
 	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataB))
 
 	responseData := &resources.DataContainer{}
@@ -98,7 +111,7 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 }
 
 func (fc Form3Client) FetchAccount(id string) (*resources.DataContainer, error) {
-	url := fc.buildRequestURL(map[string]string{}, "accounts", id)
+	url := fc.buildRequestURL(resources.Account, id, emptyParameters)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 
 	responseData := &resources.DataContainer{}
@@ -109,11 +122,14 @@ func (fc Form3Client) FetchAccount(id string) (*resources.DataContainer, error) 
 }
 
 func (fc Form3Client) ListAccount(filter map[string]interface{}, pageNumber, pageSize int) (*resources.ListDataContainer, error) {
-	url := fc.buildRequestURL(map[string]string{
-		"page[number]": strconv.Itoa(pageNumber),
-		"page[size]":   strconv.Itoa(pageSize),
-		// TODO add the filter query parameter
-	}, "accounts")
+	url := fc.buildRequestURL(
+		resources.Account,
+		emptyID,
+		map[string]string{
+			"page[number]": strconv.Itoa(pageNumber),
+			"page[size]":   strconv.Itoa(pageSize),
+			// TODO add the filter query parameter
+		})
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 
 	responseData := &resources.ListDataContainer{}
@@ -125,17 +141,20 @@ func (fc Form3Client) ListAccount(filter map[string]interface{}, pageNumber, pag
 
 func (fc Form3Client) DeleteAccount(id string, version int) error {
 	url := fc.buildRequestURL(
+		resources.Account,
+		id,
 		map[string]string{
 			"version": strconv.Itoa(version),
-		}, "accounts", id)
+		},
+	)
 	req, _ := http.NewRequest(http.MethodDelete, url, nil)
 
 	return fc.makeRequest(req, nil)
 }
 
 func (fc Form3Client) makeRequest(req *http.Request, responseData interface{}) error {
-	req.Header.Set("Accept", "application/vnd.api+json")
-	req.Header.Set("Content-Type", "application/vnd.api+json")
+	req.Header.Set("Accept", fc.headerAccept)
+	req.Header.Set("Content-Type", fc.headerContentType)
 
 	resp, err := fc.httpClient.Do(req)
 	if err != nil {
@@ -185,13 +204,12 @@ func (fc Form3Client) buildBadRequestError(resp *http.Response) error {
 	return ErrBadRequest{http.MethodPost, errorData}
 }
 
-// TODO solve the resource endpoint problem
-func (fc Form3Client) buildRequestURL(parameters map[string]string, paths ...string) string {
-	endpoint := "organisation/accounts"
+func (fc Form3Client) buildRequestURL(resourceName resources.ResourceName, id string, parameters map[string]string) string {
+	endpoint := resourcesEndpointsMap[resourceName]
 	idPath := ""
 	queryParams := ""
-	if len(paths) > 1 {
-		idPath = fmt.Sprintf("/%s", paths[1])
+	if len(id) > 0 {
+		idPath = fmt.Sprintf("/%s", id)
 	}
 	if len(parameters) > 0 {
 		flatParams := []string{}
@@ -205,5 +223,5 @@ func (fc Form3Client) buildRequestURL(parameters map[string]string, paths ...str
 		}
 		queryParams = fmt.Sprintf("?%s", strings.Join(flatParams, "&"))
 	}
-	return fmt.Sprintf("%s/%s%s%s", fc.url, endpoint, idPath, queryParams)
+	return fmt.Sprintf("%s/%s%s%s", fc.baseURL, endpoint, idPath, queryParams)
 }

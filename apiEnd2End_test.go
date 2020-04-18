@@ -12,12 +12,14 @@ import (
 )
 
 const (
-	id             = "ad69e865-4402-3b3b-a0e5-3004ea9cc8dc"
-	organisationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
-	version        = 0
-	baseURL        = "http://localhost:8080/v1"
-	pageNumber     = 0
-	pageSize       = 10
+	id                = "ad69e865-4402-3b3b-a0e5-3004ea9cc8dc"
+	organisationID    = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
+	version           = 0
+	baseURL           = "http://localhost:8080/v1"
+	pageNumber        = 0
+	pageSize          = 10
+	headerAccept      = "application/vnd.api+json"
+	headerContentType = "application/vnd.api+json"
 )
 
 var _ = Describe("", func() {
@@ -28,7 +30,7 @@ var _ = Describe("", func() {
 
 	BeforeEach(func() {
 		httpClient := http.DefaultClient
-		apiClient = NewForm3Client(baseURL, httpClient)
+		apiClient = NewForm3Client(baseURL, httpClient, headerAccept, headerContentType)
 	})
 
 	Describe("Account resource operations", func() {
