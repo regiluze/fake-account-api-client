@@ -48,25 +48,25 @@ var _ = Describe("Account api resource client FETCH method", func() {
 
 			client.FetchAccount(id)
 		})
-		Context("When getting succesful response", func() {
-			It("returns DataContainer struct as response data", func() {
-				account := test.BuildBasicAccountResource(id, organisationID)
-				data := resources.NewDataContainer(account)
-				dataBt, _ := json.Marshal(data)
-				expectedResponseBody := ioutil.NopCloser(bytes.NewReader(dataBt))
-				httpClientMock.EXPECT().Do(gomock.Any()).Return(
-					&http.Response{
-						StatusCode: 200,
-						Body:       expectedResponseBody,
-					},
-					nil,
-				).Times(1)
+	})
+	Context("When getting succesful response", func() {
+		It("returns DataContainer struct as response data", func() {
+			account := test.BuildBasicAccountResource(id, organisationID)
+			data := resources.NewDataContainer(account)
+			dataBt, _ := json.Marshal(data)
+			expectedResponseBody := ioutil.NopCloser(bytes.NewReader(dataBt))
+			httpClientMock.EXPECT().Do(gomock.Any()).Return(
+				&http.Response{
+					StatusCode: 200,
+					Body:       expectedResponseBody,
+				},
+				nil,
+			).Times(1)
 
-				response, err := client.FetchAccount(id)
+			response, err := client.FetchAccount(id)
 
-				Expect(err).To(BeNil())
-				Expect(response.Data.ID).To(Equal(id))
-			})
+			Expect(err).To(BeNil())
+			Expect(response.Data.ID).To(Equal(id))
 		})
 	})
 	Context("When something goes wrong", func() {

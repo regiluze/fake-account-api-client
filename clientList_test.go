@@ -33,6 +33,8 @@ var _ = Describe("Account api resource client LIST method", func() {
 		emptyFilter    map[string]interface{}
 	)
 
+	queryParameters := fmt.Sprintf("?page[number]=%d&page[size]=%d", pageNumber, pageSize)
+
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
@@ -46,36 +48,35 @@ var _ = Describe("Account api resource client LIST method", func() {
 			client.ListAccount(emptyFilter, pageNumber, pageSize)
 		})
 		It("builds a request with resource endpoint and page[number] and page[size] parameters", func() {
-			queryParameters := fmt.Sprintf("?page[number]=%d&page[size]=%d", pageNumber, pageSize)
 			httpClientMock.EXPECT().Do(test.IsRequestURL(fmt.Sprintf("%s/organisation/accounts%s", baseURL, queryParameters))).Return(nil, errors.New("fake")).Times(1)
 
 			client.ListAccount(emptyFilter, pageNumber, pageSize)
 		})
-		Context("When getting succesful response", func() {
-			It("returns ListDataContainer struct as response data", func() {
-				account1 := test.BuildBasicAccountResource(id, organisationID)
-				account2 := test.BuildBasicAccountResource(id2, organisationID2)
-				data := resources.ListDataContainer{
-					Data: []resources.Resource{
-						account1,
-						account2,
-					},
-				}
-				dataBt, _ := json.Marshal(data)
-				expectedResponseBody := ioutil.NopCloser(bytes.NewReader(dataBt))
-				httpClientMock.EXPECT().Do(gomock.Any()).Return(
-					&http.Response{
-						StatusCode: 200,
-						Body:       expectedResponseBody,
-					},
-					nil,
-				).Times(1)
+	})
+	Context("When getting succesful response", func() {
+		It("returns ListDataContainer struct as response data", func() {
+			account1 := test.BuildBasicAccountResource(id, organisationID)
+			account2 := test.BuildBasicAccountResource(id2, organisationID2)
+			data := resources.ListDataContainer{
+				Data: []resources.Resource{
+					account1,
+					account2,
+				},
+			}
+			dataBt, _ := json.Marshal(data)
+			expectedResponseBody := ioutil.NopCloser(bytes.NewReader(dataBt))
+			httpClientMock.EXPECT().Do(gomock.Any()).Return(
+				&http.Response{
+					StatusCode: 200,
+					Body:       expectedResponseBody,
+				},
+				nil,
+			).Times(1)
 
-				response, err := client.ListAccount(emptyFilter, pageNumber, pageSize)
+			response, err := client.ListAccount(emptyFilter, pageNumber, pageSize)
 
-				Expect(err).To(BeNil())
-				Expect(len(response.Data)).To(Equal(2))
-			})
+			Expect(err).To(BeNil())
+			Expect(len(response.Data)).To(Equal(2))
 		})
 	})
 	Context("When something goes wrong", func() {
@@ -109,7 +110,6 @@ var _ = Describe("Account api resource client LIST method", func() {
 	})
 	Context("When getting error response from the server", func() {
 		It("returns an error when server responses an error 50X", func() {
-			queryParameters := fmt.Sprintf("?page[number]=%d&page[size]=%d", pageNumber, pageSize)
 			httpClientMock.EXPECT().Do(gomock.Any()).Return(
 				&http.Response{
 					StatusCode: 500,
@@ -128,7 +128,6 @@ var _ = Describe("Account api resource client LIST method", func() {
 			)
 		})
 		It("returns ErrNotFound error when server responses an error 40X", func() {
-			queryParameters := fmt.Sprintf("?page[number]=%d&page[size]=%d", pageNumber, pageSize)
 			httpClientMock.EXPECT().Do(gomock.Any()).Return(
 				&http.Response{
 					StatusCode: 409,

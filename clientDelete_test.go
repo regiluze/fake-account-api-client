@@ -43,19 +43,19 @@ var _ = Describe("Account api resource client DELETE method", func() {
 
 			client.DeleteAccount(id, version)
 		})
-		Context("When getting succesful response", func() {
-			It("returns resourceContainer struct as response data", func() {
-				httpClientMock.EXPECT().Do(gomock.Any()).Return(
-					&http.Response{
-						StatusCode: 204,
-					},
-					nil,
-				).Times(1)
+	})
+	Context("When getting succesful response", func() {
+		It("returns resourceContainer struct as response data", func() {
+			httpClientMock.EXPECT().Do(gomock.Any()).Return(
+				&http.Response{
+					StatusCode: 204,
+				},
+				nil,
+			).Times(1)
 
-				err := client.DeleteAccount(id, version)
+			err := client.DeleteAccount(id, version)
 
-				Expect(err).To(BeNil())
-			})
+			Expect(err).To(BeNil())
 		})
 	})
 	Context("When something goes wrong", func() {

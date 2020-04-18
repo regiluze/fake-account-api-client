@@ -100,16 +100,14 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(">>>>>> status code ", resp.StatusCode)
 	if err := fc.isResponseStatusCodeAnError(resp, http.MethodPost, url); err != nil {
 		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
-	// TODO test for this
-	//if err != nil {
-	//	return nil, err
-	//}
+	if err != nil {
+		return nil, err
+	}
 	var responseData resources.DataContainer
 	if err := json.Unmarshal(body, &responseData); err != nil {
 		return nil, err
@@ -135,10 +133,9 @@ func (fc Form3Client) FetchAccount(id string) (*resources.DataContainer, error) 
 	}
 	body, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
-	// TODO test for this
-	//if err != nil {
-	//	return nil, err
-	//}
+	if err != nil {
+		return nil, err
+	}
 	var responseData resources.DataContainer
 	if err := json.Unmarshal(body, &responseData); err != nil {
 		return nil, err
@@ -152,7 +149,6 @@ func (fc Form3Client) ListAccount(filter map[string]interface{}, pageNumber, pag
 		"page[size]":   strconv.Itoa(pageSize),
 		// TODO add the filter query parameter
 	}, "accounts")
-	fmt.Println(">>>> url ", url)
 	req, _ := http.NewRequest(
 		http.MethodGet,
 		url,
@@ -169,10 +165,9 @@ func (fc Form3Client) ListAccount(filter map[string]interface{}, pageNumber, pag
 	}
 	body, _ := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
-	// TODO test for this
-	//if err != nil {
-	//	return nil, err
-	//}
+	if err != nil {
+		return nil, err
+	}
 	var responseData resources.ListDataContainer
 	if err := json.Unmarshal(body, &responseData); err != nil {
 		return nil, err
