@@ -19,16 +19,18 @@ import (
 )
 
 const (
-	id             = "ad27e265-4402-3b3b-a0e5-3004ea9cc8dc"
-	organisationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
-	baseURL        = "api_base_url"
+	pageNumber      = 0
+	pageSize        = 50
+	id2             = "ad27e265-4402-3b3b-a0e3-6664ea9cc8dc"
+	organisationID2 = "eb0bd6f9-c3f5-44b2-b644-acd23cdde73c"
 )
 
-var _ = Describe("Account api resource client FETCH method", func() {
+var _ = Describe("Account api resource client LIST method", func() {
 	var (
 		client         *Form3Client
 		mockCtrl       *gomock.Controller
 		httpClientMock *MockHTTPClient
+		emptyFilter    map[string]interface{}
 	)
 
 	BeforeEach(func() {
@@ -41,17 +43,24 @@ var _ = Describe("Account api resource client FETCH method", func() {
 		It("builds a request with GET method", func() {
 			httpClientMock.EXPECT().Do(test.IsRequestMethod("GET")).Return(nil, errors.New("fake")).Times(1)
 
-			client.FetchAccount(id)
+			client.ListAccount(emptyFilter, pageNumber, pageSize)
 		})
-		It("builds a request with resource endpoint and resource id", func() {
-			httpClientMock.EXPECT().Do(test.IsRequestURL(fmt.Sprintf("%s/organisation/accounts/%s", baseURL, id))).Return(nil, errors.New("fake")).Times(1)
+		It("builds a request with resource endpoint and page[number] and page[size] parameters", func() {
+			queryParameters := fmt.Sprintf("?page[number]=%d&page[size]=%d", pageNumber, pageSize)
+			httpClientMock.EXPECT().Do(test.IsRequestURL(fmt.Sprintf("%s/organisation/accounts%s", baseURL, queryParameters))).Return(nil, errors.New("fake")).Times(1)
 
-			client.FetchAccount(id)
+			client.ListAccount(emptyFilter, pageNumber, pageSize)
 		})
 		Context("When getting succesful response", func() {
-			It("returns DataContainer struct as response data", func() {
-				account := test.BuildBasicAccountResource(id, organisationID)
-				data := resources.NewDataContainer(account)
+			It("returns ListDataContainer struct as response data", func() {
+				account1 := test.BuildBasicAccountResource(id, organisationID)
+				account2 := test.BuildBasicAccountResource(id2, organisationID2)
+				data := resources.ListDataContainer{
+					Data: []resources.Resource{
+						account1,
+						account2,
+					},
+				}
 				dataBt, _ := json.Marshal(data)
 				expectedResponseBody := ioutil.NopCloser(bytes.NewReader(dataBt))
 				httpClientMock.EXPECT().Do(gomock.Any()).Return(
@@ -62,10 +71,10 @@ var _ = Describe("Account api resource client FETCH method", func() {
 					nil,
 				).Times(1)
 
-				response, err := client.FetchAccount(id)
+				response, err := client.ListAccount(emptyFilter, pageNumber, pageSize)
 
 				Expect(err).To(BeNil())
-				Expect(response.Data.ID).To(Equal(id))
+				Expect(len(response.Data)).To(Equal(2))
 			})
 		})
 	})
@@ -76,7 +85,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				errors.New("error"),
 			).Times(1)
 
-			response, err := client.FetchAccount(id)
+			response, err := client.ListAccount(emptyFilter, pageNumber, pageSize)
 
 			Expect(response).To(BeNil())
 			Expect(err).NotTo(BeNil())
@@ -92,7 +101,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.FetchAccount(id)
+			response, err := client.ListAccount(emptyFilter, pageNumber, pageSize)
 
 			Expect(response).To(BeNil())
 			Expect(err).NotTo(BeNil())
@@ -100,6 +109,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 	})
 	Context("When getting error response from the server", func() {
 		It("returns an error when server responses an error 50X", func() {
+			queryParameters := fmt.Sprintf("?page[number]=%d&page[size]=%d", pageNumber, pageSize)
 			httpClientMock.EXPECT().Do(gomock.Any()).Return(
 				&http.Response{
 					StatusCode: 500,
@@ -107,32 +117,37 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.FetchAccount(id)
+			response, err := client.ListAccount(emptyFilter, pageNumber, pageSize)
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(
 				MatchError(
 					ErrFromServer{"GET",
-						fmt.Sprintf("%s/organisation/accounts/%s", baseURL, id),
+						fmt.Sprintf("%s/organisation/accounts%s", baseURL, queryParameters),
 						500}),
 			)
 		})
-		It("returns ErrNotFound error when server responses an error 404", func() {
+		It("returns ErrNotFound error when server responses an error 40X", func() {
+			queryParameters := fmt.Sprintf("?page[number]=%d&page[size]=%d", pageNumber, pageSize)
 			httpClientMock.EXPECT().Do(gomock.Any()).Return(
 				&http.Response{
-					StatusCode: 404,
+					StatusCode: 409,
 				},
 				nil,
 			).Times(1)
 
-			response, err := client.FetchAccount(id)
+			response, err := client.ListAccount(emptyFilter, pageNumber, pageSize)
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(
 				MatchError(
-					ErrNotFound{fmt.Sprintf("%s/organisation/accounts/%s",
-						baseURL,
-						id)}),
+					ErrFromServer{
+						"GET",
+						fmt.Sprintf("%s/organisation/accounts%s",
+							baseURL,
+							queryParameters),
+						409,
+					}),
 			)
 		})
 	})

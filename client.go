@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -94,7 +95,6 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 	)
 	req.Header.Set("Accept", "application/vnd.api+json")
 	req.Header.Set("Content-Type", "application/vnd.api+json")
-	fmt.Println(">>>>>> verb ", req.Method)
 
 	resp, err := fc.httpClient.Do(req)
 	if err != nil {
@@ -105,7 +105,6 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 		return nil, err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
-	fmt.Println(">>>>>> body ", string(body))
 	defer resp.Body.Close()
 	// TODO test for this
 	//if err != nil {
@@ -141,6 +140,40 @@ func (fc Form3Client) FetchAccount(id string) (*resources.DataContainer, error) 
 	//	return nil, err
 	//}
 	var responseData resources.DataContainer
+	if err := json.Unmarshal(body, &responseData); err != nil {
+		return nil, err
+	}
+	return &responseData, nil
+}
+
+func (fc Form3Client) ListAccount(filter map[string]interface{}, pageNumber, pageSize int) (*resources.ListDataContainer, error) {
+	url := fc.buildRequestURL(map[string]string{
+		"page[number]": strconv.Itoa(pageNumber),
+		"page[size]":   strconv.Itoa(pageSize),
+		// TODO add the filter query parameter
+	}, "accounts")
+	fmt.Println(">>>> url ", url)
+	req, _ := http.NewRequest(
+		http.MethodGet,
+		url,
+		nil,
+	)
+	req.Header.Set("Accept", "application/vnd.api+json")
+	req.Header.Set("Content-Type", "application/vnd.api+json")
+	resp, err := fc.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if err := fc.isResponseStatusCodeAnError(resp, http.MethodGet, url); err != nil {
+		return nil, err
+	}
+	body, _ := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	// TODO test for this
+	//if err != nil {
+	//	return nil, err
+	//}
+	var responseData resources.ListDataContainer
 	if err := json.Unmarshal(body, &responseData); err != nil {
 		return nil, err
 	}
@@ -204,8 +237,13 @@ func (fc Form3Client) buildRequestURL(parameters map[string]string, paths ...str
 	}
 	if len(parameters) > 0 {
 		flatParams := []string{}
-		for name, value := range parameters {
-			flatParams = append(flatParams, fmt.Sprintf("%s=%s", name, value))
+		paramNames := []string{}
+		for name := range parameters {
+			paramNames = append(paramNames, name)
+		}
+		sort.Strings(paramNames)
+		for _, name := range paramNames {
+			flatParams = append(flatParams, fmt.Sprintf("%s=%s", name, parameters[name]))
 		}
 		queryParams = fmt.Sprintf("?%s", strings.Join(flatParams, "&"))
 	}

@@ -5,6 +5,10 @@ type DataContainer struct {
 	Links map[string]string `json:"links,omitempty"`
 }
 
+type ListDataContainer struct {
+	Data []Resource `json:"data"`
+}
+
 type Resource struct {
 	ResourceType   string                 `json:"type"`
 	ID             string                 `json:"id"`
