@@ -26,10 +26,7 @@ var _ = Describe("", func() {
 	var (
 		apiClient   *Form3Client
 		emptyFilter = map[string]interface{}{}
-		headers     = map[string]string{
-			"Accept":       "application/vnd.api+json",
-			"Content-type": "application/vnd.api+json",
-		}
+		headers     = NewClientHeaders("application/vnd.api+json", "application/vnd.api+json")
 	)
 
 	BeforeEach(func() {

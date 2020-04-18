@@ -85,6 +85,13 @@ type Form3Client struct {
 	headers    map[string]string
 }
 
+func NewClientHeaders(accept, contentType string) map[string]string {
+	return map[string]string{
+		"Accept":       accept,
+		"Content-Type": contentType,
+	}
+}
+
 func NewForm3Client(httpClient HTTPClient, apiBaseURL string, headers map[string]string) *Form3Client {
 	return &Form3Client{
 		httpClient: httpClient,
