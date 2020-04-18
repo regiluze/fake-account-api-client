@@ -88,59 +88,24 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 		return nil, err
 	}
 	url := fc.buildRequestURL(map[string]string{}, "accounts")
-	req, _ := http.NewRequest(
-		http.MethodPost,
-		url,
-		bytes.NewBuffer(dataB),
-	)
-	req.Header.Set("Accept", "application/vnd.api+json")
-	req.Header.Set("Content-Type", "application/vnd.api+json")
+	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataB))
 
-	resp, err := fc.httpClient.Do(req)
-	if err != nil {
+	responseData := &resources.DataContainer{}
+	if err := fc.makeRequest(req, responseData); err != nil {
 		return nil, err
 	}
-	if err := fc.isResponseStatusCodeAnError(resp, http.MethodPost, url); err != nil {
-		return nil, err
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-	var responseData resources.DataContainer
-	if err := json.Unmarshal(body, &responseData); err != nil {
-		return nil, err
-	}
-	return &responseData, nil
+	return responseData, nil
 }
 
 func (fc Form3Client) FetchAccount(id string) (*resources.DataContainer, error) {
 	url := fc.buildRequestURL(map[string]string{}, "accounts", id)
-	req, _ := http.NewRequest(
-		http.MethodGet,
-		url,
-		nil,
-	)
-	req.Header.Set("Accept", "application/vnd.api+json")
-	req.Header.Set("Content-Type", "application/vnd.api+json")
-	resp, err := fc.httpClient.Do(req)
-	if err != nil {
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+
+	responseData := &resources.DataContainer{}
+	if err := fc.makeRequest(req, responseData); err != nil {
 		return nil, err
 	}
-	if err := fc.isResponseStatusCodeAnError(resp, http.MethodGet, url); err != nil {
-		return nil, err
-	}
-	body, _ := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-	var responseData resources.DataContainer
-	if err := json.Unmarshal(body, &responseData); err != nil {
-		return nil, err
-	}
-	return &responseData, nil
+	return responseData, nil
 }
 
 func (fc Form3Client) ListAccount(filter map[string]interface{}, pageNumber, pageSize int) (*resources.ListDataContainer, error) {
@@ -149,30 +114,13 @@ func (fc Form3Client) ListAccount(filter map[string]interface{}, pageNumber, pag
 		"page[size]":   strconv.Itoa(pageSize),
 		// TODO add the filter query parameter
 	}, "accounts")
-	req, _ := http.NewRequest(
-		http.MethodGet,
-		url,
-		nil,
-	)
-	req.Header.Set("Accept", "application/vnd.api+json")
-	req.Header.Set("Content-Type", "application/vnd.api+json")
-	resp, err := fc.httpClient.Do(req)
-	if err != nil {
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+
+	responseData := &resources.ListDataContainer{}
+	if err := fc.makeRequest(req, responseData); err != nil {
 		return nil, err
 	}
-	if err := fc.isResponseStatusCodeAnError(resp, http.MethodGet, url); err != nil {
-		return nil, err
-	}
-	body, _ := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-	var responseData resources.ListDataContainer
-	if err := json.Unmarshal(body, &responseData); err != nil {
-		return nil, err
-	}
-	return &responseData, nil
+	return responseData, nil
 }
 
 func (fc Form3Client) DeleteAccount(id string, version int) error {
@@ -180,19 +128,34 @@ func (fc Form3Client) DeleteAccount(id string, version int) error {
 		map[string]string{
 			"version": strconv.Itoa(version),
 		}, "accounts", id)
-	req, _ := http.NewRequest(
-		http.MethodDelete,
-		url,
-		nil,
-	)
+	req, _ := http.NewRequest(http.MethodDelete, url, nil)
+
+	return fc.makeRequest(req, nil)
+}
+
+func (fc Form3Client) makeRequest(req *http.Request, responseData interface{}) error {
+	req.Header.Set("Accept", "application/vnd.api+json")
+	req.Header.Set("Content-Type", "application/vnd.api+json")
+
 	resp, err := fc.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
-	if err := fc.isResponseStatusCodeAnError(resp, http.MethodDelete, url); err != nil {
+	if err := fc.isResponseStatusCodeAnError(resp, req.Method, req.URL.String()); err != nil {
 		return err
 	}
-	return err
+	if responseData != nil {
+		body, err := ioutil.ReadAll(resp.Body)
+		defer resp.Body.Close()
+		if err != nil {
+			return err
+		}
+
+		if err := json.Unmarshal(body, &responseData); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (fc Form3Client) isResponseStatusCodeAnError(resp *http.Response, verb, url string) error {
