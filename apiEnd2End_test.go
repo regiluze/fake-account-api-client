@@ -16,11 +16,14 @@ const (
 	organisationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
 	version        = 0
 	baseURL        = "http://localhost:8080/v1"
+	pageNumber     = 0
+	pageSize       = 10
 )
 
 var _ = Describe("", func() {
 	var (
-		apiClient *Form3Client
+		apiClient   *Form3Client
+		emptyFilter = map[string]interface{}{}
 	)
 
 	BeforeEach(func() {
@@ -55,6 +58,16 @@ var _ = Describe("", func() {
 				Expect(err).To(BeNil())
 				Expect(resp.Data.ID).To(Equal(id))
 				fmt.Println(">>>> response data ", resp)
+			})
+		})
+		Context("List", func() {
+			It("returns a collection of accounts", func() {
+
+				resp, err := apiClient.ListAccount(emptyFilter, pageNumber, pageNumber)
+
+				Expect(err).To(BeNil())
+				//Expect(resp.Data.ID).To(Equal(id))
+				fmt.Println(">>>> response data ", len(resp.Data))
 			})
 		})
 		Context("Delete", func() {
