@@ -30,6 +30,10 @@ var (
 		"Accept":       "accept",
 		"Content-type": "content-type",
 	}
+	fakeHeaders2 = map[string]string{
+		"Accept":       "accept2",
+		"Content-type": "content-type2",
+	}
 )
 
 var _ = Describe("Account api resource client LIST method", func() {

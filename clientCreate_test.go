@@ -74,6 +74,23 @@ var _ = Describe("Account api resource client CREATE method", func() {
 
 			client.CreateAccount(account)
 		})
+		It("changes client headers setting different ones", func() {
+			account := test.BuildBasicAccountResource(id, organisationID)
+			data := resources.NewDataContainer(account)
+			dataB, _ := json.Marshal(data)
+			req, _ := http.NewRequest(
+				"POST",
+				fmt.Sprintf("%s/organisation/accounts", baseURL),
+				bytes.NewBuffer(dataB),
+			)
+			req.Header.Set("Accept", fakeHeaders2["Accept"])
+			req.Header.Set("Content-Type", fakeHeaders2["Content-Type"])
+			client.SetHeaders(fakeHeaders2)
+
+			httpClientMock.EXPECT().Do(test.IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
+
+			client.CreateAccount(account)
+		})
 	})
 	Context("When getting succesful response", func() {
 		// TODO status code

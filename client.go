@@ -93,6 +93,10 @@ func NewForm3Client(httpClient HTTPClient, apiBaseURL string, headers map[string
 	}
 }
 
+func (fc *Form3Client) SetHeaders(headers map[string]string) {
+	fc.headers = headers
+}
+
 func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.DataContainer, error) {
 	data := resources.NewDataContainer(resource)
 	dataB, err := json.Marshal(data)
