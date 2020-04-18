@@ -80,18 +80,17 @@ type HTTPClient interface {
 }
 
 type Form3Client struct {
-	baseURL           string
-	headerAccept      string
-	headerContentType string
-	httpClient        HTTPClient
+	httpClient HTTPClient
+	baseURL    string
+	headers    map[string]string
 }
 
-func NewForm3Client(apiBaseURL string, httpClient HTTPClient, headerAccept, headerContentType string) *Form3Client {
+func NewForm3Client(httpClient HTTPClient, apiBaseURL string, headers map[string]string) *Form3Client {
 	return &Form3Client{
-		baseURL:           apiBaseURL,
-		httpClient:        httpClient,
-		headerAccept:      headerAccept,
-		headerContentType: headerContentType}
+		httpClient: httpClient,
+		baseURL:    apiBaseURL,
+		headers:    headers,
+	}
 }
 
 func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.DataContainer, error) {
@@ -153,8 +152,8 @@ func (fc Form3Client) DeleteAccount(id string, version int) error {
 }
 
 func (fc Form3Client) makeRequest(req *http.Request, responseData interface{}) error {
-	req.Header.Set("Accept", fc.headerAccept)
-	req.Header.Set("Content-Type", fc.headerContentType)
+	req.Header.Set("Accept", fc.headers["Accept"])
+	req.Header.Set("Content-Type", fc.headers["Content-Type"])
 
 	resp, err := fc.httpClient.Do(req)
 	if err != nil {

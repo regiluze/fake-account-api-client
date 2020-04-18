@@ -18,7 +18,7 @@ const (
 	baseURL           = "http://localhost:8080/v1"
 	pageNumber        = 0
 	pageSize          = 10
-	headerAccept      = "application/vnd.api+json"
+	headerAccept      = ""
 	headerContentType = "application/vnd.api+json"
 )
 
@@ -26,11 +26,15 @@ var _ = Describe("", func() {
 	var (
 		apiClient   *Form3Client
 		emptyFilter = map[string]interface{}{}
+		headers     = map[string]string{
+			"Accept":       "application/vnd.api+json",
+			"Content-type": "application/vnd.api+json",
+		}
 	)
 
 	BeforeEach(func() {
 		httpClient := http.DefaultClient
-		apiClient = NewForm3Client(baseURL, httpClient, headerAccept, headerContentType)
+		apiClient = NewForm3Client(httpClient, baseURL, headers)
 	})
 
 	Describe("Account resource operations", func() {

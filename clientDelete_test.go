@@ -28,7 +28,7 @@ var _ = Describe("Account api resource client DELETE method", func() {
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
-		client = NewForm3Client(baseURL, httpClientMock, headerAccept, headerContentType)
+		client = NewForm3Client(httpClientMock, baseURL, fakeHeaders)
 	})
 
 	Context("building request", func() {

@@ -19,12 +19,17 @@ import (
 )
 
 const (
-	pageNumber        = 0
-	pageSize          = 50
-	id2               = "ad27e265-4402-3b3b-a0e3-6664ea9cc8dc"
-	organisationID2   = "eb0bd6f9-c3f5-44b2-b644-acd23cdde73c"
-	headerAccept      = "headerAccept"
-	headerContentType = "headerContentType"
+	pageNumber      = 0
+	pageSize        = 50
+	id2             = "ad27e265-4402-3b3b-a0e3-6664ea9cc8dc"
+	organisationID2 = "eb0bd6f9-c3f5-44b2-b644-acd23cdde73c"
+)
+
+var (
+	fakeHeaders = map[string]string{
+		"Accept":       "accept",
+		"Content-type": "content-type",
+	}
 )
 
 var _ = Describe("Account api resource client LIST method", func() {
@@ -40,7 +45,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
-		client = NewForm3Client(baseURL, httpClientMock, headerAccept, headerContentType)
+		client = NewForm3Client(httpClientMock, baseURL, fakeHeaders)
 	})
 
 	Context("building request", func() {

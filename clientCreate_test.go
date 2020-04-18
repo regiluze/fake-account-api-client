@@ -28,7 +28,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
-		client = NewForm3Client(baseURL, httpClientMock, headerAccept, headerContentType)
+		client = NewForm3Client(httpClientMock, baseURL, fakeHeaders)
 	})
 
 	Context("Building the request", func() {
@@ -68,8 +68,8 @@ var _ = Describe("Account api resource client CREATE method", func() {
 				fmt.Sprintf("%s/organisation/accounts", baseURL),
 				bytes.NewBuffer(dataB),
 			)
-			req.Header.Set("Accept", headerAccept)
-			req.Header.Set("Content-Type", headerContentType)
+			req.Header.Set("Accept", fakeHeaders["Accept"])
+			req.Header.Set("Content-Type", fakeHeaders["Content-Type"])
 			httpClientMock.EXPECT().Do(test.IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
 
 			client.CreateAccount(account)
