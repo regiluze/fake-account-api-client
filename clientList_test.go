@@ -43,7 +43,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
-		client = NewForm3Client(httpClientMock, baseURL, fakeHeaders)
+		client = NewForm3Client(baseURL, fakeHeaders, httpClientMock)
 	})
 
 	Context("building request", func() {

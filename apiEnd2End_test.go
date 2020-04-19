@@ -4,7 +4,6 @@ package accountclient
 
 import (
 	"fmt"
-	"net/http"
 
 	"./resources"
 	. "github.com/onsi/ginkgo"
@@ -30,8 +29,7 @@ var _ = Describe("", func() {
 	)
 
 	BeforeEach(func() {
-		httpClient := http.DefaultClient
-		apiClient = NewForm3Client(httpClient, baseURL, headers)
+		apiClient = NewForm3Client(baseURL, headers, nil)
 	})
 
 	Describe("Account resource operations", func() {

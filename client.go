@@ -92,7 +92,10 @@ func NewClientHeaders(accept, contentType string) map[string]string {
 	}
 }
 
-func NewForm3Client(httpClient HTTPClient, apiBaseURL string, headers map[string]string) *Form3Client {
+func NewForm3Client(apiBaseURL string, headers map[string]string, httpClient HTTPClient) *Form3Client {
+	if httpClient == nil {
+		httpClient = &http.Client{}
+	}
 	return &Form3Client{
 		httpClient: httpClient,
 		baseURL:    apiBaseURL,
