@@ -4,6 +4,7 @@ package accountclient
 
 import (
 	"fmt"
+	"time"
 
 	"./resources"
 	. "github.com/onsi/ginkgo"
@@ -11,25 +12,27 @@ import (
 )
 
 const (
-	id                = "ad69e865-4402-3b3b-a0e5-3004ea9cc8dc"
-	organisationID    = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
-	version           = 0
-	baseURL           = "http://localhost:8080/v1"
-	pageNumber        = 0
-	pageSize          = 10
-	headerAccept      = ""
-	headerContentType = "application/vnd.api+json"
+	id             = "ad69e865-4402-3b3b-a0e5-3004ea9cc8dc"
+	organisationID = "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c"
+	version        = 0
+	baseURL        = "http://localhost:8080"
+	apiVersion     = "v1"
+	pageNumber     = 0
+	pageSize       = 10
+	headerAccept   = ""
+	mimeType       = "application/vnd.api+json"
 )
 
 var _ = Describe("", func() {
 	var (
 		apiClient   *Form3Client
 		emptyFilter = map[string]interface{}{}
-		headers     = NewClientHeaders("application/vnd.api+json", "application/vnd.api+json")
+		urlBuilder  URLBuilder
 	)
 
 	BeforeEach(func() {
-		apiClient = NewForm3Client(baseURL, headers, nil)
+		urlBuilder = NewURLBuilder(baseURL, apiVersion)
+		apiClient = NewForm3APIClientWithTimeout(mimeType, urlBuilder, 5*time.Second)
 	})
 
 	Describe("Account resource operations", func() {
@@ -50,6 +53,8 @@ var _ = Describe("", func() {
 				Expect(resp.Data.ID).To(Equal(id))
 				fmt.Println(">>>> response data ", resp)
 			})
+			// create for another country
+			// create without country
 		})
 		Context("Fetch", func() {
 			It("fetch an account with provided 'id' parameter", func() {
@@ -60,6 +65,8 @@ var _ = Describe("", func() {
 				Expect(resp.Data.ID).To(Equal(id))
 				fmt.Println(">>>> response data ", resp)
 			})
+			// bad request
+			// not found
 		})
 		Context("List", func() {
 			It("returns a collection of accounts", func() {
@@ -75,6 +82,7 @@ var _ = Describe("", func() {
 				//Expect(resp.Data.ID).To(Equal(id))
 				fmt.Println(">>>> response data ", len(resp.Data))
 			})
+			//
 		})
 		Context("Delete", func() {
 			It("delete an account with provided 'id' parameter", func() {
@@ -83,6 +91,8 @@ var _ = Describe("", func() {
 
 				Expect(err).To(BeNil())
 			})
+			// not found
+			// bad request
 		})
 	})
 

@@ -29,12 +29,15 @@ var _ = Describe("Account api resource client FETCH method", func() {
 		client         *Form3Client
 		mockCtrl       *gomock.Controller
 		httpClientMock *MockHTTPClient
+		urlBuilder     URLBuilder
+		expectedURL    = fmt.Sprintf("%s/%s/organisation/accounts/%s", baseURL, apiVersion, id)
 	)
 
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
-		client = NewForm3Client(baseURL, fakeHeaders, httpClientMock)
+		urlBuilder = NewURLBuilder(baseURL, apiVersion)
+		client = NewForm3APIClient(fakeMimeType, urlBuilder, httpClientMock)
 	})
 
 	Context("building request", func() {
@@ -44,7 +47,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 			client.Fetch(resources.Account, id)
 		})
 		It("builds a request with resource endpoint and resource id", func() {
-			httpClientMock.EXPECT().Do(test.IsRequestURL(fmt.Sprintf("%s/organisation/accounts/%s", baseURL, id))).Return(nil, errors.New("fake")).Times(1)
+			httpClientMock.EXPECT().Do(test.IsRequestURL(expectedURL)).Return(nil, errors.New("fake")).Times(1)
 
 			client.Fetch(resources.Account, id)
 		})
@@ -113,7 +116,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 			Expect(err).Should(
 				MatchError(
 					ErrFromServer{"GET",
-						fmt.Sprintf("%s/organisation/accounts/%s", baseURL, id),
+						expectedURL,
 						500}),
 			)
 		})
@@ -130,9 +133,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 			Expect(response).To(BeNil())
 			Expect(err).Should(
 				MatchError(
-					ErrNotFound{fmt.Sprintf("%s/organisation/accounts/%s",
-						baseURL,
-						id)}),
+					ErrNotFound{expectedURL}),
 			)
 		})
 	})

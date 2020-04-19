@@ -23,12 +23,15 @@ var _ = Describe("Account api resource client CREATE method", func() {
 		client         *Form3Client
 		mockCtrl       *gomock.Controller
 		httpClientMock *MockHTTPClient
+		urlBuilder     URLBuilder
+		expectedURL    = fmt.Sprintf("%s/%v/organisation/accounts", baseURL, apiVersion)
 	)
 
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
-		client = NewForm3Client(baseURL, fakeHeaders, httpClientMock)
+		urlBuilder = NewURLBuilder(baseURL, apiVersion)
+		client = NewForm3APIClient(fakeMimeType, urlBuilder, httpClientMock)
 	})
 
 	Context("Building the request", func() {
@@ -40,7 +43,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 			client.Create(resources.Account, accountData)
 		})
 		It("builds a request with resource endpoint", func() {
-			httpClientMock.EXPECT().Do(test.IsRequestURL(fmt.Sprintf("%s/organisation/accounts", baseURL))).Return(nil, errors.New("fake")).Times(1)
+			httpClientMock.EXPECT().Do(test.IsRequestURL(expectedURL)).Return(nil, errors.New("fake")).Times(1)
 
 			accountData := resources.NewAccount(id, organisationID, map[string]interface{}{})
 
@@ -52,7 +55,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 			dataB, _ := json.Marshal(data)
 			req, _ := http.NewRequest(
 				"POST",
-				fmt.Sprintf("%s/organisation/accounts", baseURL),
+				expectedURL,
 				bytes.NewBuffer(dataB),
 			)
 			httpClientMock.EXPECT().Do(test.IsRequestBody(req)).Return(nil, errors.New("fake")).Times(1)
@@ -65,11 +68,11 @@ var _ = Describe("Account api resource client CREATE method", func() {
 			dataB, _ := json.Marshal(data)
 			req, _ := http.NewRequest(
 				"POST",
-				fmt.Sprintf("%s/organisation/accounts", baseURL),
+				expectedURL,
 				bytes.NewBuffer(dataB),
 			)
-			req.Header.Set("Accept", fakeHeaders["Accept"])
-			req.Header.Set("Content-Type", fakeHeaders["Content-Type"])
+			req.Header.Set("Accept", fakeMimeType)
+			req.Header.Set("Content-Type", fakeMimeType)
 			httpClientMock.EXPECT().Do(test.IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
 
 			client.Create(resources.Account, accountData)
@@ -80,12 +83,12 @@ var _ = Describe("Account api resource client CREATE method", func() {
 			dataB, _ := json.Marshal(data)
 			req, _ := http.NewRequest(
 				"POST",
-				fmt.Sprintf("%s/organisation/accounts", baseURL),
+				expectedURL,
 				bytes.NewBuffer(dataB),
 			)
-			req.Header.Set("Accept", fakeHeaders2["Accept"])
-			req.Header.Set("Content-Type", fakeHeaders2["Content-Type"])
-			client.SetHeaders(fakeHeaders2)
+			req.Header.Set("Accept", anotherFakeMimeType)
+			req.Header.Set("Content-Type", anotherFakeMimeType)
+			client.SetMimeType(anotherFakeMimeType)
 
 			httpClientMock.EXPECT().Do(test.IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
 
@@ -159,7 +162,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 			Expect(err).Should(
 				MatchError(
 					ErrFromServer{"POST",
-						fmt.Sprintf("%s/organisation/accounts", baseURL),
+						expectedURL,
 						500}),
 			)
 		})
@@ -178,7 +181,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 			Expect(err).Should(
 				MatchError(
 					ErrFromServer{"POST",
-						fmt.Sprintf("%s/organisation/accounts", baseURL),
+						expectedURL,
 						403}),
 			)
 		})

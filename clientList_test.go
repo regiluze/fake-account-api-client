@@ -19,31 +19,31 @@ import (
 )
 
 const (
-	pageNumber      = 0
-	pageSize        = 50
-	id2             = "ad27e265-4402-3b3b-a0e3-6664ea9cc8dc"
-	organisationID2 = "eb0bd6f9-c3f5-44b2-b644-acd23cdde73c"
-)
-
-var (
-	fakeHeaders  = NewClientHeaders("accept", "contentType")
-	fakeHeaders2 = NewClientHeaders("accept2", "contentType2")
+	pageNumber          = 0
+	pageSize            = 50
+	id2                 = "ad27e265-4402-3b3b-a0e3-6664ea9cc8dc"
+	organisationID2     = "eb0bd6f9-c3f5-44b2-b644-acd23cdde73c"
+	fakeMimeType        = "fakemimeType"
+	anotherFakeMimeType = "anotherfakemimeType"
+	apiVersion          = "1"
 )
 
 var _ = Describe("Account api resource client LIST method", func() {
 	var (
-		client         *Form3Client
-		mockCtrl       *gomock.Controller
-		httpClientMock *MockHTTPClient
-		emptyFilter    map[string]interface{}
+		client          *Form3Client
+		mockCtrl        *gomock.Controller
+		httpClientMock  *MockHTTPClient
+		emptyFilter     map[string]interface{}
+		urlBuilder      URLBuilder
+		queryParameters = fmt.Sprintf("?page[number]=%d&page[size]=%d", pageNumber, pageSize)
+		expectedURL     = fmt.Sprintf(fmt.Sprintf("%s/%s/organisation/accounts%s", baseURL, apiVersion, queryParameters))
 	)
-
-	queryParameters := fmt.Sprintf("?page[number]=%d&page[size]=%d", pageNumber, pageSize)
 
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
-		client = NewForm3Client(baseURL, fakeHeaders, httpClientMock)
+		urlBuilder = NewURLBuilder(baseURL, apiVersion)
+		client = NewForm3APIClient(fakeMimeType, urlBuilder, httpClientMock)
 	})
 
 	Context("building request", func() {
@@ -53,7 +53,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 			client.List(resources.Account, emptyFilter, pageNumber, pageSize)
 		})
 		It("builds a request with resource endpoint and page[number] and page[size] parameters", func() {
-			httpClientMock.EXPECT().Do(test.IsRequestURL(fmt.Sprintf("%s/organisation/accounts%s", baseURL, queryParameters))).Return(nil, errors.New("fake")).Times(1)
+			httpClientMock.EXPECT().Do(test.IsRequestURL(expectedURL)).Return(nil, errors.New("fake")).Times(1)
 
 			client.List(resources.Account, emptyFilter, pageNumber, pageSize)
 		})
@@ -128,7 +128,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 			Expect(err).Should(
 				MatchError(
 					ErrFromServer{"GET",
-						fmt.Sprintf("%s/organisation/accounts%s", baseURL, queryParameters),
+						expectedURL,
 						500}),
 			)
 		})
@@ -147,9 +147,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 				MatchError(
 					ErrFromServer{
 						"GET",
-						fmt.Sprintf("%s/organisation/accounts%s",
-							baseURL,
-							queryParameters),
+						expectedURL,
 						409,
 					}),
 			)

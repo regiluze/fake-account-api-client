@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"./resources"
@@ -18,9 +16,6 @@ var (
 	emptyID                  = ""
 	emptyParameters          = map[string]string{}
 	basicErrorAPIStatusCodes = [...]int{401, 403, 405, 406, 409, 429, 500, 502, 503, 504}
-	resourcesEndpointsMap    = map[resources.ResourceName]string{
-		resources.Account: "organisation/accounts",
-	}
 )
 
 // ErrNotFound is returned when getting a 404 status code from server.
@@ -82,14 +77,38 @@ type HTTPClient interface {
 
 type Form3Client struct {
 	httpClient HTTPClient
+	mimeType   string
 	baseURL    string
 	headers    map[string]string
+	urlBuilder URLBuilder
 }
 
 func NewClientHeaders(accept, contentType string) map[string]string {
 	return map[string]string{
 		"Accept":       accept,
 		"Content-Type": contentType,
+	}
+}
+
+func NewForm3APIClient(mimeType string, urlBuilder URLBuilder, httpClient HTTPClient) *Form3Client {
+	if httpClient == nil {
+		httpClient = &http.Client{}
+	}
+	return &Form3Client{
+		httpClient: httpClient,
+		mimeType:   mimeType,
+		urlBuilder: urlBuilder,
+	}
+}
+
+func NewForm3APIClientWithTimeout(mimeType string, URLBuilder URLBuilder, timeout time.Duration) *Form3Client {
+	httpClient := &http.Client{
+		Timeout: timeout,
+	}
+	return &Form3Client{
+		httpClient: httpClient,
+		mimeType:   mimeType,
+		urlBuilder: URLBuilder,
 	}
 }
 
@@ -115,8 +134,8 @@ func NewForm3ClientWithTimeout(apiBaseURL string, headers map[string]string, tim
 	}
 }
 
-func (fc *Form3Client) SetHeaders(headers map[string]string) {
-	fc.headers = headers
+func (fc *Form3Client) SetMimeType(mimeType string) {
+	fc.mimeType = mimeType
 }
 
 func (fc Form3Client) Create(resourceName resources.ResourceName, resource resources.Resource) (*resources.DataContainer, error) {
@@ -125,7 +144,7 @@ func (fc Form3Client) Create(resourceName resources.ResourceName, resource resou
 	if err != nil {
 		return nil, err
 	}
-	url := fc.buildRequestURL(resourceName, emptyID, emptyParameters)
+	url := fc.urlBuilder.Do(resourceName, emptyID, emptyParameters)
 	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataB))
 
 	responseData := &resources.DataContainer{}
@@ -136,7 +155,7 @@ func (fc Form3Client) Create(resourceName resources.ResourceName, resource resou
 }
 
 func (fc Form3Client) Fetch(resourceName resources.ResourceName, id string) (*resources.DataContainer, error) {
-	url := fc.buildRequestURL(resourceName, id, emptyParameters)
+	url := fc.urlBuilder.Do(resourceName, id, emptyParameters)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 
 	responseData := &resources.DataContainer{}
@@ -147,7 +166,7 @@ func (fc Form3Client) Fetch(resourceName resources.ResourceName, id string) (*re
 }
 
 func (fc Form3Client) List(resourceName resources.ResourceName, filter map[string]interface{}, pageNumber, pageSize int) (*resources.ListDataContainer, error) {
-	url := fc.buildRequestURL(
+	url := fc.urlBuilder.Do(
 		resourceName,
 		emptyID,
 		map[string]string{
@@ -165,7 +184,7 @@ func (fc Form3Client) List(resourceName resources.ResourceName, filter map[strin
 }
 
 func (fc Form3Client) Delete(resourceName resources.ResourceName, id string, version int) error {
-	url := fc.buildRequestURL(
+	url := fc.urlBuilder.Do(
 		resourceName,
 		id,
 		map[string]string{
@@ -178,8 +197,8 @@ func (fc Form3Client) Delete(resourceName resources.ResourceName, id string, ver
 }
 
 func (fc Form3Client) makeRequest(req *http.Request, responseData interface{}) error {
-	req.Header.Set("Accept", fc.headers["Accept"])
-	req.Header.Set("Content-Type", fc.headers["Content-Type"])
+	req.Header.Set("Accept", fc.mimeType)
+	req.Header.Set("Content-Type", fc.mimeType)
 
 	resp, err := fc.httpClient.Do(req)
 	if err != nil {
@@ -227,26 +246,4 @@ func (fc Form3Client) buildBadRequestError(resp *http.Response) error {
 		return err
 	}
 	return ErrBadRequest{http.MethodPost, errorData}
-}
-
-func (fc Form3Client) buildRequestURL(resourceName resources.ResourceName, id string, parameters map[string]string) string {
-	endpoint := resourcesEndpointsMap[resourceName]
-	idPath := ""
-	queryParams := ""
-	if len(id) > 0 {
-		idPath = fmt.Sprintf("/%s", id)
-	}
-	if len(parameters) > 0 {
-		flatParams := []string{}
-		paramNames := []string{}
-		for name := range parameters {
-			paramNames = append(paramNames, name)
-		}
-		sort.Strings(paramNames)
-		for _, name := range paramNames {
-			flatParams = append(flatParams, fmt.Sprintf("%s=%s", name, parameters[name]))
-		}
-		queryParams = fmt.Sprintf("?%s", strings.Join(flatParams, "&"))
-	}
-	return fmt.Sprintf("%s/%s%s%s", fc.baseURL, endpoint, idPath, queryParams)
 }
