@@ -78,8 +78,6 @@ type HTTPClient interface {
 type Form3Client struct {
 	httpClient HTTPClient
 	mimeType   string
-	baseURL    string
-	headers    map[string]string
 	urlBuilder URLBuilder
 }
 
@@ -109,28 +107,6 @@ func NewForm3APIClientWithTimeout(mimeType string, URLBuilder URLBuilder, timeou
 		httpClient: httpClient,
 		mimeType:   mimeType,
 		urlBuilder: URLBuilder,
-	}
-}
-
-func NewForm3Client(apiBaseURL string, headers map[string]string, httpClient HTTPClient) *Form3Client {
-	if httpClient == nil {
-		httpClient = &http.Client{}
-	}
-	return &Form3Client{
-		httpClient: httpClient,
-		baseURL:    apiBaseURL,
-		headers:    headers,
-	}
-}
-
-func NewForm3ClientWithTimeout(apiBaseURL string, headers map[string]string, timeout time.Duration) *Form3Client {
-	httpClient := &http.Client{
-		Timeout: timeout,
-	}
-	return &Form3Client{
-		httpClient: httpClient,
-		baseURL:    apiBaseURL,
-		headers:    headers,
 	}
 }
 
