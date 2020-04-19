@@ -26,6 +26,8 @@ const (
 	fakeMimeType        = "fakemimeType"
 	anotherFakeMimeType = "anotherfakemimeType"
 	apiVersion          = "1"
+	fakeToken           = "secrettoken"
+	anotherFakeToken    = "anothersecretoken"
 )
 
 var _ = Describe("Account api resource client LIST method", func() {
@@ -43,7 +45,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
 		urlBuilder = NewURLBuilder(baseURL, apiVersion)
-		client = NewForm3APIClient(fakeMimeType, urlBuilder, httpClientMock)
+		client = NewForm3APIClient(fakeMimeType, fakeToken, urlBuilder, httpClientMock)
 	})
 
 	Context("building request", func() {

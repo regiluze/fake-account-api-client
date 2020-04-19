@@ -31,7 +31,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
 		urlBuilder = NewURLBuilder(baseURL, apiVersion)
-		client = NewForm3APIClient(fakeMimeType, urlBuilder, httpClientMock)
+		client = NewForm3APIClient(fakeMimeType, fakeToken, urlBuilder, httpClientMock)
 	})
 
 	Context("Building the request", func() {
@@ -90,6 +90,39 @@ var _ = Describe("Account api resource client CREATE method", func() {
 			req.Header.Set("Content-Type", anotherFakeMimeType)
 			client.SetMimeType(anotherFakeMimeType)
 
+			httpClientMock.EXPECT().Do(test.IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
+
+			client.Create(resources.Account, accountData)
+		})
+		It("builds a request with bearen token authorization", func() {
+			accountData := test.BuildBasicAccountResource(id, organisationID)
+			data := resources.NewDataContainer(accountData)
+			dataB, _ := json.Marshal(data)
+			req, _ := http.NewRequest(
+				"POST",
+				expectedURL,
+				bytes.NewBuffer(dataB),
+			)
+			req.Header.Set("Accept", fakeMimeType)
+			req.Header.Set("Content-Type", fakeMimeType)
+			req.Header.Set("Authorization", fmt.Sprintf("bearer %s", fakeToken))
+			httpClientMock.EXPECT().Do(test.IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
+
+			client.Create(resources.Account, accountData)
+		})
+		It("builds a request with different bearen token authorization when setting another one", func() {
+			client.SetAuthToken(anotherFakeToken)
+			accountData := test.BuildBasicAccountResource(id, organisationID)
+			data := resources.NewDataContainer(accountData)
+			dataB, _ := json.Marshal(data)
+			req, _ := http.NewRequest(
+				"POST",
+				expectedURL,
+				bytes.NewBuffer(dataB),
+			)
+			req.Header.Set("Accept", fakeMimeType)
+			req.Header.Set("Content-Type", fakeMimeType)
+			req.Header.Set("Authorization", fmt.Sprintf("bearer %s", anotherFakeToken))
 			httpClientMock.EXPECT().Do(test.IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
 
 			client.Create(resources.Account, accountData)

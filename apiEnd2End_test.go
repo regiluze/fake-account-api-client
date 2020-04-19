@@ -21,6 +21,7 @@ const (
 	pageSize       = 10
 	headerAccept   = ""
 	mimeType       = "application/vnd.api+json"
+	authToken      = ""
 )
 
 var _ = Describe("", func() {
@@ -32,7 +33,7 @@ var _ = Describe("", func() {
 
 	BeforeEach(func() {
 		urlBuilder = NewURLBuilder(baseURL, apiVersion)
-		apiClient = NewForm3APIClientWithTimeout(mimeType, urlBuilder, 5*time.Second)
+		apiClient = NewForm3APIClientWithTimeout(mimeType, authToken, urlBuilder, 5*time.Second)
 	})
 
 	Describe("Account resource operations", func() {

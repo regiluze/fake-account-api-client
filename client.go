@@ -77,18 +77,12 @@ type HTTPClient interface {
 
 type Form3Client struct {
 	httpClient HTTPClient
-	mimeType   string
 	urlBuilder URLBuilder
+	mimeType   string
+	authToken  string
 }
 
-func NewClientHeaders(accept, contentType string) map[string]string {
-	return map[string]string{
-		"Accept":       accept,
-		"Content-Type": contentType,
-	}
-}
-
-func NewForm3APIClient(mimeType string, urlBuilder URLBuilder, httpClient HTTPClient) *Form3Client {
+func NewForm3APIClient(mimeType, authToken string, urlBuilder URLBuilder, httpClient HTTPClient) *Form3Client {
 	if httpClient == nil {
 		httpClient = &http.Client{}
 	}
@@ -96,10 +90,11 @@ func NewForm3APIClient(mimeType string, urlBuilder URLBuilder, httpClient HTTPCl
 		httpClient: httpClient,
 		mimeType:   mimeType,
 		urlBuilder: urlBuilder,
+		authToken:  authToken,
 	}
 }
 
-func NewForm3APIClientWithTimeout(mimeType string, URLBuilder URLBuilder, timeout time.Duration) *Form3Client {
+func NewForm3APIClientWithTimeout(mimeType, authToken string, URLBuilder URLBuilder, timeout time.Duration) *Form3Client {
 	httpClient := &http.Client{
 		Timeout: timeout,
 	}
@@ -107,11 +102,16 @@ func NewForm3APIClientWithTimeout(mimeType string, URLBuilder URLBuilder, timeou
 		httpClient: httpClient,
 		mimeType:   mimeType,
 		urlBuilder: URLBuilder,
+		authToken:  authToken,
 	}
 }
 
 func (fc *Form3Client) SetMimeType(mimeType string) {
 	fc.mimeType = mimeType
+}
+
+func (fc *Form3Client) SetAuthToken(token string) {
+	fc.authToken = token
 }
 
 func (fc Form3Client) Create(resourceName resources.ResourceName, resource resources.Resource) (*resources.DataContainer, error) {
@@ -175,6 +175,7 @@ func (fc Form3Client) Delete(resourceName resources.ResourceName, id string, ver
 func (fc Form3Client) makeRequest(req *http.Request, responseData interface{}) error {
 	req.Header.Set("Accept", fc.mimeType)
 	req.Header.Set("Content-Type", fc.mimeType)
+	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", fc.authToken))
 
 	resp, err := fc.httpClient.Do(req)
 	if err != nil {
