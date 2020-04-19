@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"./resources"
 )
@@ -95,6 +96,17 @@ func NewClientHeaders(accept, contentType string) map[string]string {
 func NewForm3Client(apiBaseURL string, headers map[string]string, httpClient HTTPClient) *Form3Client {
 	if httpClient == nil {
 		httpClient = &http.Client{}
+	}
+	return &Form3Client{
+		httpClient: httpClient,
+		baseURL:    apiBaseURL,
+		headers:    headers,
+	}
+}
+
+func NewForm3ClientWithTimeout(apiBaseURL string, headers map[string]string, timeout time.Duration) *Form3Client {
+	httpClient := &http.Client{
+		Timeout: timeout,
 	}
 	return &Form3Client{
 		httpClient: httpClient,
