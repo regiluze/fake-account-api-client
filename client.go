@@ -104,13 +104,13 @@ func (fc *Form3Client) SetHeaders(headers map[string]string) {
 	fc.headers = headers
 }
 
-func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.DataContainer, error) {
+func (fc Form3Client) Create(resourceName resources.ResourceName, resource resources.Resource) (*resources.DataContainer, error) {
 	data := resources.NewDataContainer(resource)
 	dataB, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
-	url := fc.buildRequestURL(resources.Account, emptyID, emptyParameters)
+	url := fc.buildRequestURL(resourceName, emptyID, emptyParameters)
 	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataB))
 
 	responseData := &resources.DataContainer{}
@@ -120,8 +120,8 @@ func (fc Form3Client) CreateAccount(resource resources.Resource) (*resources.Dat
 	return responseData, nil
 }
 
-func (fc Form3Client) FetchAccount(id string) (*resources.DataContainer, error) {
-	url := fc.buildRequestURL(resources.Account, id, emptyParameters)
+func (fc Form3Client) Fetch(resourceName resources.ResourceName, id string) (*resources.DataContainer, error) {
+	url := fc.buildRequestURL(resourceName, id, emptyParameters)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 
 	responseData := &resources.DataContainer{}
@@ -131,9 +131,9 @@ func (fc Form3Client) FetchAccount(id string) (*resources.DataContainer, error) 
 	return responseData, nil
 }
 
-func (fc Form3Client) ListAccount(filter map[string]interface{}, pageNumber, pageSize int) (*resources.ListDataContainer, error) {
+func (fc Form3Client) List(resourceName resources.ResourceName, filter map[string]interface{}, pageNumber, pageSize int) (*resources.ListDataContainer, error) {
 	url := fc.buildRequestURL(
-		resources.Account,
+		resourceName,
 		emptyID,
 		map[string]string{
 			"page[number]": strconv.Itoa(pageNumber),
@@ -149,9 +149,9 @@ func (fc Form3Client) ListAccount(filter map[string]interface{}, pageNumber, pag
 	return responseData, nil
 }
 
-func (fc Form3Client) DeleteAccount(id string, version int) error {
+func (fc Form3Client) Delete(resourceName resources.ResourceName, id string, version int) error {
 	url := fc.buildRequestURL(
-		resources.Account,
+		resourceName,
 		id,
 		map[string]string{
 			"version": strconv.Itoa(version),

@@ -41,12 +41,12 @@ var _ = Describe("Account api resource client FETCH method", func() {
 		It("builds a request with GET method", func() {
 			httpClientMock.EXPECT().Do(test.IsRequestMethod("GET")).Return(nil, errors.New("fake")).Times(1)
 
-			client.FetchAccount(id)
+			client.Fetch(resources.Account, id)
 		})
 		It("builds a request with resource endpoint and resource id", func() {
 			httpClientMock.EXPECT().Do(test.IsRequestURL(fmt.Sprintf("%s/organisation/accounts/%s", baseURL, id))).Return(nil, errors.New("fake")).Times(1)
 
-			client.FetchAccount(id)
+			client.Fetch(resources.Account, id)
 		})
 	})
 	Context("When getting succesful response", func() {
@@ -63,7 +63,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.FetchAccount(id)
+			response, err := client.Fetch(resources.Account, id)
 
 			Expect(err).To(BeNil())
 			Expect(response.Data.ID).To(Equal(id))
@@ -76,7 +76,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				errors.New("error"),
 			).Times(1)
 
-			response, err := client.FetchAccount(id)
+			response, err := client.Fetch(resources.Account, id)
 
 			Expect(response).To(BeNil())
 			Expect(err).NotTo(BeNil())
@@ -92,7 +92,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.FetchAccount(id)
+			response, err := client.Fetch(resources.Account, id)
 
 			Expect(response).To(BeNil())
 			Expect(err).NotTo(BeNil())
@@ -107,7 +107,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.FetchAccount(id)
+			response, err := client.Fetch(resources.Account, id)
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(
@@ -125,7 +125,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.FetchAccount(id)
+			response, err := client.Fetch(resources.Account, id)
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(

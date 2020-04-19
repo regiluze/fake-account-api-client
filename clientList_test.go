@@ -50,12 +50,12 @@ var _ = Describe("Account api resource client LIST method", func() {
 		It("builds a request with GET method", func() {
 			httpClientMock.EXPECT().Do(test.IsRequestMethod("GET")).Return(nil, errors.New("fake")).Times(1)
 
-			client.ListAccount(emptyFilter, pageNumber, pageSize)
+			client.List(resources.Account, emptyFilter, pageNumber, pageSize)
 		})
 		It("builds a request with resource endpoint and page[number] and page[size] parameters", func() {
 			httpClientMock.EXPECT().Do(test.IsRequestURL(fmt.Sprintf("%s/organisation/accounts%s", baseURL, queryParameters))).Return(nil, errors.New("fake")).Times(1)
 
-			client.ListAccount(emptyFilter, pageNumber, pageSize)
+			client.List(resources.Account, emptyFilter, pageNumber, pageSize)
 		})
 	})
 	Context("When getting succesful response", func() {
@@ -78,7 +78,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.ListAccount(emptyFilter, pageNumber, pageSize)
+			response, err := client.List(resources.Account, emptyFilter, pageNumber, pageSize)
 
 			Expect(err).To(BeNil())
 			Expect(len(response.Data)).To(Equal(2))
@@ -91,7 +91,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 				errors.New("error"),
 			).Times(1)
 
-			response, err := client.ListAccount(emptyFilter, pageNumber, pageSize)
+			response, err := client.List(resources.Account, emptyFilter, pageNumber, pageSize)
 
 			Expect(response).To(BeNil())
 			Expect(err).NotTo(BeNil())
@@ -107,7 +107,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.ListAccount(emptyFilter, pageNumber, pageSize)
+			response, err := client.List(resources.Account, emptyFilter, pageNumber, pageSize)
 
 			Expect(response).To(BeNil())
 			Expect(err).NotTo(BeNil())
@@ -122,7 +122,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.ListAccount(emptyFilter, pageNumber, pageSize)
+			response, err := client.List(resources.Account, emptyFilter, pageNumber, pageSize)
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(
@@ -140,7 +140,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.ListAccount(emptyFilter, pageNumber, pageSize)
+			response, err := client.List(resources.Account, emptyFilter, pageNumber, pageSize)
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(

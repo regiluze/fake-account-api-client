@@ -45,9 +45,9 @@ var _ = Describe("", func() {
 					"bic":           "NWBKGB22",
 				}
 
-				account := resources.NewAccount(id, organisationID, attributes)
+				accountData := resources.NewAccount(id, organisationID, attributes)
 
-				resp, err := apiClient.CreateAccount(account)
+				resp, err := apiClient.Create(resources.Account, accountData)
 				Expect(err).To(BeNil())
 				Expect(resp.Data.ID).To(Equal(id))
 				fmt.Println(">>>> response data ", resp)
@@ -56,7 +56,7 @@ var _ = Describe("", func() {
 		Context("Fetch", func() {
 			It("fetch an account with provided 'id' parameter", func() {
 
-				resp, err := apiClient.FetchAccount(id)
+				resp, err := apiClient.Fetch(resources.Account, id)
 
 				Expect(err).To(BeNil())
 				Expect(resp.Data.ID).To(Equal(id))
@@ -66,7 +66,12 @@ var _ = Describe("", func() {
 		Context("List", func() {
 			It("returns a collection of accounts", func() {
 
-				resp, err := apiClient.ListAccount(emptyFilter, pageNumber, pageNumber)
+				resp, err := apiClient.List(
+					resources.Account,
+					emptyFilter,
+					pageNumber,
+					pageNumber,
+				)
 
 				Expect(err).To(BeNil())
 				//Expect(resp.Data.ID).To(Equal(id))
@@ -76,7 +81,7 @@ var _ = Describe("", func() {
 		Context("Delete", func() {
 			It("delete an account with provided 'id' parameter", func() {
 
-				err := apiClient.DeleteAccount(id, version)
+				err := apiClient.Delete(resources.Account, id, version)
 
 				Expect(err).To(BeNil())
 			})
