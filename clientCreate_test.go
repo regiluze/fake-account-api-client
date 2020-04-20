@@ -4,6 +4,7 @@ package accountclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -25,6 +26,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 		httpClientMock *MockHTTPClient
 		urlBuilder     URLBuilder
 		expectedURL    = fmt.Sprintf("%s/%v/organisation/accounts", baseURL, apiVersion)
+		ctx            = context.Background()
 	)
 
 	BeforeEach(func() {
@@ -40,14 +42,14 @@ var _ = Describe("Account api resource client CREATE method", func() {
 
 			accountData := resources.NewAccount(id, organisationID, map[string]interface{}{})
 
-			client.Create(resources.Account, accountData)
+			client.Create(ctx, resources.Account, accountData)
 		})
 		It("builds a request with resource endpoint", func() {
 			httpClientMock.EXPECT().Do(test.IsRequestURL(expectedURL)).Return(nil, errors.New("fake")).Times(1)
 
 			accountData := resources.NewAccount(id, organisationID, map[string]interface{}{})
 
-			client.Create(resources.Account, accountData)
+			client.Create(ctx, resources.Account, accountData)
 		})
 		It("builds a request with dataContainer struct data", func() {
 			accountData := test.BuildBasicAccountResource(id, organisationID)
@@ -60,7 +62,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 			)
 			httpClientMock.EXPECT().Do(test.IsRequestBody(req)).Return(nil, errors.New("fake")).Times(1)
 
-			client.Create(resources.Account, accountData)
+			client.Create(ctx, resources.Account, accountData)
 		})
 		It("builds a request with accept and content type values in header", func() {
 			accountData := test.BuildBasicAccountResource(id, organisationID)
@@ -75,7 +77,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 			req.Header.Set("Content-Type", fakeMimeType)
 			httpClientMock.EXPECT().Do(test.IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
 
-			client.Create(resources.Account, accountData)
+			client.Create(ctx, resources.Account, accountData)
 		})
 		It("changes client headers setting different ones", func() {
 			accountData := test.BuildBasicAccountResource(id, organisationID)
@@ -92,7 +94,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 
 			httpClientMock.EXPECT().Do(test.IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
 
-			client.Create(resources.Account, accountData)
+			client.Create(ctx, resources.Account, accountData)
 		})
 		It("builds a request with bearen token authorization", func() {
 			accountData := test.BuildBasicAccountResource(id, organisationID)
@@ -108,7 +110,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 			req.Header.Set("Authorization", fmt.Sprintf("bearer %s", fakeToken))
 			httpClientMock.EXPECT().Do(test.IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
 
-			client.Create(resources.Account, accountData)
+			client.Create(ctx, resources.Account, accountData)
 		})
 		It("builds a request with different bearen token authorization when setting another one", func() {
 			client.SetAuthToken(anotherFakeToken)
@@ -125,7 +127,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 			req.Header.Set("Authorization", fmt.Sprintf("bearer %s", anotherFakeToken))
 			httpClientMock.EXPECT().Do(test.IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
 
-			client.Create(resources.Account, accountData)
+			client.Create(ctx, resources.Account, accountData)
 		})
 	})
 	Context("When getting succesful response", func() {
@@ -142,7 +144,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.Create(resources.Account, accountData)
+			response, err := client.Create(ctx, resources.Account, accountData)
 
 			Expect(err).To(BeNil())
 			Expect(response.Data.ID).To(Equal(id))
@@ -156,7 +158,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 				errors.New("error"),
 			).Times(1)
 
-			response, err := client.Create(resources.Account, accountData)
+			response, err := client.Create(ctx, resources.Account, accountData)
 
 			Expect(response).To(BeNil())
 			Expect(err).NotTo(BeNil())
@@ -173,7 +175,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.Create(resources.Account, accountData)
+			response, err := client.Create(ctx, resources.Account, accountData)
 
 			Expect(response).To(BeNil())
 			Expect(err).NotTo(BeNil())
@@ -189,7 +191,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.Create(resources.Account, accountData)
+			response, err := client.Create(ctx, resources.Account, accountData)
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(
@@ -208,7 +210,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.Create(resources.Account, accountData)
+			response, err := client.Create(ctx, resources.Account, accountData)
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(
@@ -234,7 +236,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.Create(resources.Account, accountData)
+			response, err := client.Create(ctx, resources.Account, accountData)
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(

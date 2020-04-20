@@ -4,6 +4,7 @@ package accountclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,6 +32,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 		httpClientMock *MockHTTPClient
 		urlBuilder     URLBuilder
 		expectedURL    = fmt.Sprintf("%s/%s/organisation/accounts/%s", baseURL, apiVersion, id)
+		ctx            = context.Background()
 	)
 
 	BeforeEach(func() {
@@ -44,12 +46,12 @@ var _ = Describe("Account api resource client FETCH method", func() {
 		It("builds a request with GET method", func() {
 			httpClientMock.EXPECT().Do(test.IsRequestMethod("GET")).Return(nil, errors.New("fake")).Times(1)
 
-			client.Fetch(resources.Account, id)
+			client.Fetch(ctx, resources.Account, id)
 		})
 		It("builds a request with resource endpoint and resource id", func() {
 			httpClientMock.EXPECT().Do(test.IsRequestURL(expectedURL)).Return(nil, errors.New("fake")).Times(1)
 
-			client.Fetch(resources.Account, id)
+			client.Fetch(ctx, resources.Account, id)
 		})
 	})
 	Context("When getting succesful response", func() {
@@ -66,7 +68,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.Fetch(resources.Account, id)
+			response, err := client.Fetch(ctx, resources.Account, id)
 
 			Expect(err).To(BeNil())
 			Expect(response.Data.ID).To(Equal(id))
@@ -79,7 +81,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				errors.New("error"),
 			).Times(1)
 
-			response, err := client.Fetch(resources.Account, id)
+			response, err := client.Fetch(ctx, resources.Account, id)
 
 			Expect(response).To(BeNil())
 			Expect(err).NotTo(BeNil())
@@ -95,7 +97,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.Fetch(resources.Account, id)
+			response, err := client.Fetch(ctx, resources.Account, id)
 
 			Expect(response).To(BeNil())
 			Expect(err).NotTo(BeNil())
@@ -110,7 +112,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.Fetch(resources.Account, id)
+			response, err := client.Fetch(ctx, resources.Account, id)
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(
@@ -128,7 +130,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 				nil,
 			).Times(1)
 
-			response, err := client.Fetch(resources.Account, id)
+			response, err := client.Fetch(ctx, resources.Account, id)
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(

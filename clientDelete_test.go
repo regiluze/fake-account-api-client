@@ -3,6 +3,7 @@
 package accountclient
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -26,6 +27,7 @@ var _ = Describe("Account api resource client DELETE method", func() {
 		httpClientMock *MockHTTPClient
 		urlBuilder     URLBuilder
 		expectedURL    = fmt.Sprintf("%s/%s/organisation/accounts/%s?version=%d", baseURL, apiVersion, id, version)
+		ctx            = context.Background()
 	)
 
 	BeforeEach(func() {
@@ -39,12 +41,12 @@ var _ = Describe("Account api resource client DELETE method", func() {
 		It("builds a request with DELETE method", func() {
 			httpClientMock.EXPECT().Do(test.IsRequestMethod("DELETE")).Return(nil, errors.New("fake")).Times(1)
 
-			client.Delete(resources.Account, id, version)
+			client.Delete(ctx, resources.Account, id, version)
 		})
 		It("builds a request with resource endpoint with resource id and 'version' query parameter", func() {
 			httpClientMock.EXPECT().Do(test.IsRequestURL(expectedURL)).Return(nil, errors.New("fake")).Times(1)
 
-			client.Delete(resources.Account, id, version)
+			client.Delete(ctx, resources.Account, id, version)
 		})
 	})
 	Context("When getting succesful response", func() {
@@ -56,7 +58,7 @@ var _ = Describe("Account api resource client DELETE method", func() {
 				nil,
 			).Times(1)
 
-			err := client.Delete(resources.Account, id, version)
+			err := client.Delete(ctx, resources.Account, id, version)
 
 			Expect(err).To(BeNil())
 		})
@@ -68,7 +70,7 @@ var _ = Describe("Account api resource client DELETE method", func() {
 				errors.New("error"),
 			).Times(1)
 
-			err := client.Delete(resources.Account, id, version)
+			err := client.Delete(ctx, resources.Account, id, version)
 
 			Expect(err).NotTo(BeNil())
 		})
@@ -82,7 +84,7 @@ var _ = Describe("Account api resource client DELETE method", func() {
 				nil,
 			).Times(1)
 
-			err := client.Delete(resources.Account, id, version)
+			err := client.Delete(ctx, resources.Account, id, version)
 
 			Expect(err).Should(
 				MatchError(

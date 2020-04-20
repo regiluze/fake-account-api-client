@@ -2,6 +2,7 @@ package accountclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -114,7 +115,7 @@ func (fc *Form3Client) SetAuthToken(token string) {
 	fc.authToken = token
 }
 
-func (fc Form3Client) Create(resourceName resources.ResourceName, resource resources.Resource) (*resources.DataContainer, error) {
+func (fc Form3Client) Create(ctx context.Context, resourceName resources.ResourceName, resource resources.Resource) (*resources.DataContainer, error) {
 	data := resources.NewDataContainer(resource)
 	dataB, err := json.Marshal(data)
 	if err != nil {
@@ -124,24 +125,24 @@ func (fc Form3Client) Create(resourceName resources.ResourceName, resource resou
 	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataB))
 
 	responseData := &resources.DataContainer{}
-	if err := fc.makeRequest(req, responseData); err != nil {
+	if err := fc.makeRequest(ctx, req, responseData); err != nil {
 		return nil, err
 	}
 	return responseData, nil
 }
 
-func (fc Form3Client) Fetch(resourceName resources.ResourceName, id string) (*resources.DataContainer, error) {
+func (fc Form3Client) Fetch(ctx context.Context, resourceName resources.ResourceName, id string) (*resources.DataContainer, error) {
 	url := fc.urlBuilder.Do(resourceName, id, emptyParameters)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 
 	responseData := &resources.DataContainer{}
-	if err := fc.makeRequest(req, responseData); err != nil {
+	if err := fc.makeRequest(ctx, req, responseData); err != nil {
 		return nil, err
 	}
 	return responseData, nil
 }
 
-func (fc Form3Client) List(resourceName resources.ResourceName, filter map[string]interface{}, pageNumber, pageSize int) (*resources.ListDataContainer, error) {
+func (fc Form3Client) List(ctx context.Context, resourceName resources.ResourceName, filter map[string]interface{}, pageNumber, pageSize int) (*resources.ListDataContainer, error) {
 	url := fc.urlBuilder.Do(
 		resourceName,
 		emptyID,
@@ -153,13 +154,13 @@ func (fc Form3Client) List(resourceName resources.ResourceName, filter map[strin
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 
 	responseData := &resources.ListDataContainer{}
-	if err := fc.makeRequest(req, responseData); err != nil {
+	if err := fc.makeRequest(ctx, req, responseData); err != nil {
 		return nil, err
 	}
 	return responseData, nil
 }
 
-func (fc Form3Client) Delete(resourceName resources.ResourceName, id string, version int) error {
+func (fc Form3Client) Delete(ctx context.Context, resourceName resources.ResourceName, id string, version int) error {
 	url := fc.urlBuilder.Do(
 		resourceName,
 		id,
@@ -169,15 +170,16 @@ func (fc Form3Client) Delete(resourceName resources.ResourceName, id string, ver
 	)
 	req, _ := http.NewRequest(http.MethodDelete, url, nil)
 
-	return fc.makeRequest(req, nil)
+	return fc.makeRequest(ctx, req, nil)
 }
 
-func (fc Form3Client) makeRequest(req *http.Request, responseData interface{}) error {
+func (fc Form3Client) makeRequest(ctx context.Context, req *http.Request, responseData interface{}) error {
 	req.Header.Set("Accept", fc.mimeType)
 	req.Header.Set("Content-Type", fc.mimeType)
 	req.Header.Set("Authorization", fmt.Sprintf("bearer %s", fc.authToken))
+	cReq := req.WithContext(ctx)
 
-	resp, err := fc.httpClient.Do(req)
+	resp, err := fc.httpClient.Do(cReq)
 	if err != nil {
 		return err
 	}

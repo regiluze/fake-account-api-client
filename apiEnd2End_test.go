@@ -3,6 +3,7 @@
 package accountclient
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -29,6 +30,8 @@ var _ = Describe("", func() {
 		apiClient   *Form3Client
 		emptyFilter = map[string]interface{}{}
 		urlBuilder  URLBuilder
+		ctx         = context.Background()
+		// timeout test
 	)
 
 	BeforeEach(func() {
@@ -49,7 +52,7 @@ var _ = Describe("", func() {
 
 				accountData := resources.NewAccount(id, organisationID, attributes)
 
-				resp, err := apiClient.Create(resources.Account, accountData)
+				resp, err := apiClient.Create(ctx, resources.Account, accountData)
 				Expect(err).To(BeNil())
 				Expect(resp.Data.ID).To(Equal(id))
 				fmt.Println(">>>> response data ", resp)
@@ -60,7 +63,7 @@ var _ = Describe("", func() {
 		Context("Fetch", func() {
 			It("fetch an account with provided 'id' parameter", func() {
 
-				resp, err := apiClient.Fetch(resources.Account, id)
+				resp, err := apiClient.Fetch(ctx, resources.Account, id)
 
 				Expect(err).To(BeNil())
 				Expect(resp.Data.ID).To(Equal(id))
@@ -73,6 +76,7 @@ var _ = Describe("", func() {
 			It("returns a collection of accounts", func() {
 
 				resp, err := apiClient.List(
+					ctx,
 					resources.Account,
 					emptyFilter,
 					pageNumber,
@@ -88,7 +92,7 @@ var _ = Describe("", func() {
 		Context("Delete", func() {
 			It("delete an account with provided 'id' parameter", func() {
 
-				err := apiClient.Delete(resources.Account, id, version)
+				err := apiClient.Delete(ctx, resources.Account, id, version)
 
 				Expect(err).To(BeNil())
 			})
