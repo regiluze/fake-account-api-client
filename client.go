@@ -14,8 +14,6 @@ import (
 )
 
 var (
-	emptyID                  = ""
-	emptyParameters          = map[string]string{}
 	basicErrorAPIStatusCodes = [...]int{401, 403, 405, 406, 409, 429, 500, 502, 503, 504}
 )
 
@@ -121,7 +119,7 @@ func (fc Form3Client) Create(ctx context.Context, resourceName resources.Resourc
 	if err != nil {
 		return nil, err
 	}
-	url := fc.urlBuilder.Do(resourceName, emptyID, emptyParameters)
+	url := fc.urlBuilder.DoForResource(resourceName)
 	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataB))
 
 	responseData := &resources.DataContainer{}
@@ -132,7 +130,7 @@ func (fc Form3Client) Create(ctx context.Context, resourceName resources.Resourc
 }
 
 func (fc Form3Client) Fetch(ctx context.Context, resourceName resources.ResourceName, id string) (*resources.DataContainer, error) {
-	url := fc.urlBuilder.Do(resourceName, id, emptyParameters)
+	url := fc.urlBuilder.DoForResourceWithID(resourceName, id)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 
 	responseData := &resources.DataContainer{}
@@ -143,14 +141,14 @@ func (fc Form3Client) Fetch(ctx context.Context, resourceName resources.Resource
 }
 
 func (fc Form3Client) List(ctx context.Context, resourceName resources.ResourceName, filter map[string]interface{}, pageNumber, pageSize int) (*resources.ListDataContainer, error) {
-	url := fc.urlBuilder.Do(
+	url := fc.urlBuilder.DoForResourceWithParameters(
 		resourceName,
-		emptyID,
 		map[string]string{
 			"page[number]": strconv.Itoa(pageNumber),
 			"page[size]":   strconv.Itoa(pageSize),
 			// TODO add the filter query parameter
-		})
+		},
+	)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 
 	responseData := &resources.ListDataContainer{}
@@ -161,7 +159,7 @@ func (fc Form3Client) List(ctx context.Context, resourceName resources.ResourceN
 }
 
 func (fc Form3Client) Delete(ctx context.Context, resourceName resources.ResourceName, id string, version int) error {
-	url := fc.urlBuilder.Do(
+	url := fc.urlBuilder.DoForResourceWithIDAndParameters(
 		resourceName,
 		id,
 		map[string]string{
