@@ -198,22 +198,22 @@ func (fc Form3Client) makeRequest(ctx context.Context, req *http.Request, respon
 	return nil
 }
 
-func (fc Form3Client) isResponseStatusCodeAnError(resp *http.Response, verb, url string) error {
+func (fc Form3Client) isResponseStatusCodeAnError(resp *http.Response, method, url string) error {
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrNotFound{url}
 	}
 	if resp.StatusCode == http.StatusBadRequest {
-		return fc.buildBadRequestError(resp)
+		return fc.buildBadRequestError(method, resp)
 	}
 	for _, errorStatusCode := range basicErrorAPIStatusCodes {
 		if errorStatusCode == resp.StatusCode {
-			return ErrFromServer{verb, url, resp.StatusCode}
+			return ErrFromServer{method, url, resp.StatusCode}
 		}
 	}
 	return nil
 }
 
-func (fc Form3Client) buildBadRequestError(resp *http.Response) error {
+func (fc Form3Client) buildBadRequestError(method string, resp *http.Response) error {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
@@ -222,5 +222,5 @@ func (fc Form3Client) buildBadRequestError(resp *http.Response) error {
 	if err := json.Unmarshal(body, &errorData); err != nil {
 		return err
 	}
-	return ErrBadRequest{http.MethodPost, errorData}
+	return ErrBadRequest{method, errorData}
 }

@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestKpiManager(t *testing.T) {
+func TestForm3Client(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "account api client Suite")
 }
