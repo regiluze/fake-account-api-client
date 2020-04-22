@@ -3,10 +3,9 @@ FROM golang:latest
 # Add Maintainer Info
 LABEL maintainer="Ruben Eguiluz <regiluze@gmail.com>"
 
-# Set the Current Working Directory inside the container
-WORKDIR /app
+RUN mkdir -p /go/src/github.com/regiluze/form3-account-api-client
 
-# Copy the source from the current directory to the Working Directory inside the container
-COPY . .
+COPY . /go/src/github.com/regiluze/form3-account-api-client
 
+WORKDIR /go/src/github.com/regiluze/form3-account-api-client
 RUN make deps
