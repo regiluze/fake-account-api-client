@@ -14,9 +14,9 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 
-	"./resources"
 	"./test"
 	. "github.com/onsi/gomega"
+	"github.com/regiluze/form3-account-api-client/resources"
 )
 
 var _ = Describe("Account api resource client CREATE method", func() {

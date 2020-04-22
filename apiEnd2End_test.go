@@ -7,10 +7,10 @@ import (
 	"os"
 	"time"
 
-	"./resources"
 	"./test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/regiluze/form3-account-api-client/resources"
 )
 
 const (

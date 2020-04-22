@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"./resources"
+	"github.com/regiluze/form3-account-api-client/resources"
 )
 
 var (

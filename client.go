@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"./resources"
+	"github.com/regiluze/form3-account-api-client/resources"
 )
 
 var (
