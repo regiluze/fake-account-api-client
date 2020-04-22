@@ -1,6 +1,6 @@
 // +build unit
 
-package accountclient
+package test
 
 import (
 	"bytes"
@@ -14,8 +14,8 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 
-	"./test"
 	. "github.com/onsi/gomega"
+	. "github.com/regiluze/form3-account-api-client"
 	"github.com/regiluze/form3-account-api-client/resources"
 )
 
@@ -52,20 +52,20 @@ var _ = Describe("Account api resource client LIST method", func() {
 
 	Context("building request", func() {
 		It("builds a request with GET method", func() {
-			httpClientMock.EXPECT().Do(test.IsRequestMethod("GET")).Return(nil, errors.New("fake")).Times(1)
+			httpClientMock.EXPECT().Do(IsRequestMethod("GET")).Return(nil, errors.New("fake")).Times(1)
 
 			client.List(ctx, resources.Account, emptyFilter, pageNumber, pageSize)
 		})
 		It("builds a request with resource endpoint and page[number] and page[size] parameters", func() {
-			httpClientMock.EXPECT().Do(test.IsRequestURL(expectedURL)).Return(nil, errors.New("fake")).Times(1)
+			httpClientMock.EXPECT().Do(IsRequestURL(expectedURL)).Return(nil, errors.New("fake")).Times(1)
 
 			client.List(ctx, resources.Account, emptyFilter, pageNumber, pageSize)
 		})
 	})
 	Context("When getting succesful response", func() {
 		It("returns ListDataContainer struct as response data", func() {
-			account1 := test.BuildBasicAccountResource(id, organisationID)
-			account2 := test.BuildBasicAccountResource(id2, organisationID2)
+			account1 := BuildBasicAccountResource(id, organisationID)
+			account2 := BuildBasicAccountResource(id2, organisationID2)
 			data := resources.ListDataContainer{
 				Data: []resources.Resource{
 					account1,
@@ -131,9 +131,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 			Expect(response).To(BeNil())
 			Expect(err).Should(
 				MatchError(
-					ErrFromServer{"GET",
-						expectedURL,
-						500}),
+					NewErrFromServer("GET", expectedURL, 500)),
 			)
 		})
 		It("returns ErrNotFound error when server responses an error 40X", func() {
@@ -149,11 +147,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 			Expect(response).To(BeNil())
 			Expect(err).Should(
 				MatchError(
-					ErrFromServer{
-						"GET",
-						expectedURL,
-						409,
-					}),
+					NewErrFromServer("GET", expectedURL, 409)),
 			)
 		})
 	})

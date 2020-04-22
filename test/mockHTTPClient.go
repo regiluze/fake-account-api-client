@@ -2,12 +2,13 @@
 // Source: client.go
 
 // Package accountclient is a generated GoMock package.
-package accountclient
+package test
 
 import (
-	gomock "github.com/golang/mock/gomock"
 	http "net/http"
 	reflect "reflect"
+
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockHTTPClient is a mock of HTTPClient interface

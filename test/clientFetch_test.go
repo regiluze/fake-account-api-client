@@ -1,6 +1,6 @@
 // +build unit
 
-package accountclient
+package test
 
 import (
 	"bytes"
@@ -14,8 +14,8 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 
-	"./test"
 	. "github.com/onsi/gomega"
+	. "github.com/regiluze/form3-account-api-client"
 	"github.com/regiluze/form3-account-api-client/resources"
 )
 
@@ -44,19 +44,19 @@ var _ = Describe("Account api resource client FETCH method", func() {
 
 	Context("building request", func() {
 		It("builds a request with GET method", func() {
-			httpClientMock.EXPECT().Do(test.IsRequestMethod("GET")).Return(nil, errors.New("fake")).Times(1)
+			httpClientMock.EXPECT().Do(IsRequestMethod("GET")).Return(nil, errors.New("fake")).Times(1)
 
 			client.Fetch(ctx, resources.Account, id)
 		})
 		It("builds a request with resource endpoint and resource id", func() {
-			httpClientMock.EXPECT().Do(test.IsRequestURL(expectedURL)).Return(nil, errors.New("fake")).Times(1)
+			httpClientMock.EXPECT().Do(IsRequestURL(expectedURL)).Return(nil, errors.New("fake")).Times(1)
 
 			client.Fetch(ctx, resources.Account, id)
 		})
 	})
 	Context("When getting succesful response", func() {
 		It("returns DataContainer struct as response data", func() {
-			account := test.BuildBasicAccountResource(id, organisationID)
+			account := BuildBasicAccountResource(id, organisationID)
 			data := resources.NewDataContainer(account)
 			dataBt, _ := json.Marshal(data)
 			expectedResponseBody := ioutil.NopCloser(bytes.NewReader(dataBt))
@@ -117,9 +117,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 			Expect(response).To(BeNil())
 			Expect(err).Should(
 				MatchError(
-					ErrFromServer{"GET",
-						expectedURL,
-						500}),
+					NewErrFromServer("GET", expectedURL, 500)),
 			)
 		})
 		It("returns ErrNotFound error when server responses an error 404", func() {
@@ -135,7 +133,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 			Expect(response).To(BeNil())
 			Expect(err).Should(
 				MatchError(
-					ErrNotFound{expectedURL}),
+					NewErrNotFound(expectedURL)),
 			)
 		})
 	})

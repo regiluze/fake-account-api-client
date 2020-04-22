@@ -1,15 +1,15 @@
 // +build e2e
 
-package accountclient
+package test
 
 import (
 	"context"
 	"os"
 	"time"
 
-	"./test"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/regiluze/form3-account-api-client"
 	"github.com/regiluze/form3-account-api-client/resources"
 )
 
@@ -64,19 +64,19 @@ var _ = Describe("Account API e2e test suite", func() {
 		apiClient = NewForm3APIClientWithTimeout(mimeType, authToken, urlBuilder, 5*time.Second)
 
 		// set the repository
-		accountData := test.BuildUKAccountWithCoP(ukAccountID3, ukOrganisationID)
+		accountData := BuildUKAccountWithCoP(ukAccountID3, ukOrganisationID)
 		_, err := apiClient.Create(ctx, resources.Account, accountData)
 		Expect(err).To(BeNil())
-		accountData1 := test.BuildUKAccountWithCoP(ukAccountID4, ukOrganisationID)
+		accountData1 := BuildUKAccountWithCoP(ukAccountID4, ukOrganisationID)
 		_, err = apiClient.Create(ctx, resources.Account, accountData1)
 		Expect(err).To(BeNil())
-		accountData2 := test.BuildUKAccountWithCoP(ukAccountID5, ukOrganisationID)
+		accountData2 := BuildUKAccountWithCoP(ukAccountID5, ukOrganisationID)
 		_, err = apiClient.Create(ctx, resources.Account, accountData2)
 		Expect(err).To(BeNil())
-		accountData3 := test.BuildUKAccountWithCoP(ukAccountID6, ukOrganisationID)
+		accountData3 := BuildUKAccountWithCoP(ukAccountID6, ukOrganisationID)
 		_, err = apiClient.Create(ctx, resources.Account, accountData3)
 		Expect(err).To(BeNil())
-		accountData4 := test.BuildUKAccountWithCoP(ukAccountID7, ukOrganisationID)
+		accountData4 := BuildUKAccountWithCoP(ukAccountID7, ukOrganisationID)
 		_, err = apiClient.Create(ctx, resources.Account, accountData4)
 		Expect(err).To(BeNil())
 	})
@@ -109,7 +109,7 @@ var _ = Describe("Account API e2e test suite", func() {
 		})
 		Context("Create", func() {
 			It("creates a UK account without CoP (non SEPA Indirect) and return the new account data with links", func() {
-				accountData := test.BuildUKAccountWithoutCoP(ukAccountID, ukOrganisationID)
+				accountData := BuildUKAccountWithoutCoP(ukAccountID, ukOrganisationID)
 
 				resp, err := apiClient.Create(ctx, resources.Account, accountData)
 
@@ -119,7 +119,7 @@ var _ = Describe("Account API e2e test suite", func() {
 
 			})
 			It("creates a UK account with CoP (non SEPA Indirect) and return the new account data with links", func() {
-				accountData := test.BuildUKAccountWithCoP(ukAccountID2, ukOrganisationID)
+				accountData := BuildUKAccountWithCoP(ukAccountID2, ukOrganisationID)
 
 				resp, err := apiClient.Create(ctx, resources.Account, accountData)
 
@@ -130,19 +130,19 @@ var _ = Describe("Account API e2e test suite", func() {
 			})
 			Context("Bad Request", func() {
 				It("returns Bad Request status code when missing country", func() {
-					accountData := test.BuildUKSampleAccountWithoutCountry(wrongUkAccountID, ukOrganisationID)
+					accountData := BuildUKSampleAccountWithoutCountry(wrongUkAccountID, ukOrganisationID)
 
 					resp, err := apiClient.Create(ctx, resources.Account, accountData)
 
 					Expect(resp).To(BeNil())
 					Expect(err).Should(
 						MatchError(
-							ErrBadRequest{"POST",
+							NewErrBadRequest("POST",
 								resources.BadRequestData{
 									ErrorCode:    0,
 									ErrorMessage: "validation failure list:\nvalidation failure list:\nvalidation failure list:\ncountry in body is required",
 								},
-							}),
+							)),
 					)
 				})
 			})
@@ -164,9 +164,9 @@ var _ = Describe("Account API e2e test suite", func() {
 					expectedURL := urlBuilder.DoForResourceWithID(resources.Account, notExistsUkAccountID)
 					Expect(err).Should(
 						MatchError(
-							ErrNotFound{
+							NewErrNotFound(
 								expectedURL,
-							}),
+							)),
 					)
 				})
 				It("returns an error when account id is invalid", func() {
@@ -175,12 +175,12 @@ var _ = Describe("Account API e2e test suite", func() {
 					Expect(resp).To(BeNil())
 					Expect(err).Should(
 						MatchError(
-							ErrBadRequest{"GET",
+							NewErrBadRequest("GET",
 								resources.BadRequestData{
 									ErrorCode:    0,
 									ErrorMessage: "id is not a valid uuid",
 								},
-							}),
+							)),
 					)
 				})
 			})
@@ -223,16 +223,15 @@ var _ = Describe("Account API e2e test suite", func() {
 
 					Expect(err).Should(
 						MatchError(
-							ErrBadRequest{"DELETE",
+							NewErrBadRequest("DELETE",
 								resources.BadRequestData{
 									ErrorCode:    0,
 									ErrorMessage: "id is not a valid uuid",
 								},
-							}),
+							)),
 					)
 				})
 			})
 		})
 	})
-
 })

@@ -1,4 +1,4 @@
-package accountclient
+package form3apiclient
 
 import (
 	"bytes"
@@ -22,6 +22,10 @@ type ErrNotFound struct {
 	url string
 }
 
+func NewErrNotFound(url string) error {
+	return ErrNotFound{url}
+}
+
 func (e ErrNotFound) Error() string {
 	return fmt.Sprintf(
 		"Resource or endpoint not exists: %s",
@@ -31,42 +35,44 @@ func (e ErrNotFound) Error() string {
 
 // ErrBadRequest is returned when getting a 400 status code from server.
 type ErrBadRequest struct {
-	verb      string
+	method    string
 	errorData resources.BadRequestData
+}
+
+func NewErrBadRequest(method string, errorData resources.BadRequestData) error {
+	return ErrBadRequest{method, errorData}
 }
 
 func (e ErrBadRequest) Error() string {
 	return fmt.Sprintf(
 		"Bad Request (%s): Error code %d, message: %s",
-		e.verb,
+		e.method,
 		e.errorData.ErrorCode,
 		e.errorData.ErrorMessage,
 	)
 }
 
+func (e ErrBadRequest) getErrorData() resources.BadRequestData {
+	return e.errorData
+}
+
 // ErrFromServer is returned when getting a 500 status code from server.
 type ErrFromServer struct {
-	verb       string
+	method     string
 	url        string
 	statusCode int
+}
+
+func NewErrFromServer(method, url string, statusCode int) error {
+	return ErrFromServer{method, url, statusCode}
 }
 
 func (e ErrFromServer) Error() string {
 	return fmt.Sprintf(
 		"Error requesting (%s, %s): Status code %d",
-		e.verb,
+		e.method,
 		e.url,
 		e.statusCode,
-	)
-}
-
-func createError(verb, url string, expected, actual int) error {
-	return fmt.Errorf(
-		"Error requesting: %s %s (wrong http status code; expected:%d got:%d)",
-		verb,
-		url,
-		expected,
-		actual,
 	)
 }
 
@@ -207,7 +213,7 @@ func (fc Form3Client) isResponseStatusCodeAnError(resp *http.Response, method, u
 	}
 	for _, errorStatusCode := range basicErrorAPIStatusCodes {
 		if errorStatusCode == resp.StatusCode {
-			return ErrFromServer{method, url, resp.StatusCode}
+			return NewErrFromServer(method, url, resp.StatusCode)
 		}
 	}
 	return nil
@@ -222,5 +228,5 @@ func (fc Form3Client) buildBadRequestError(method string, resp *http.Response) e
 	if err := json.Unmarshal(body, &errorData); err != nil {
 		return err
 	}
-	return ErrBadRequest{method, errorData}
+	return NewErrBadRequest(method, errorData)
 }

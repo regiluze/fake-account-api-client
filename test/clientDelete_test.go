@@ -1,6 +1,6 @@
 // +build unit
 
-package accountclient
+package test
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 
-	"./test"
 	. "github.com/onsi/gomega"
+	. "github.com/regiluze/form3-account-api-client"
 	"github.com/regiluze/form3-account-api-client/resources"
 )
 
@@ -39,12 +39,12 @@ var _ = Describe("Account api resource client DELETE method", func() {
 
 	Context("building request", func() {
 		It("builds a request with DELETE method", func() {
-			httpClientMock.EXPECT().Do(test.IsRequestMethod("DELETE")).Return(nil, errors.New("fake")).Times(1)
+			httpClientMock.EXPECT().Do(IsRequestMethod("DELETE")).Return(nil, errors.New("fake")).Times(1)
 
 			client.Delete(ctx, resources.Account, id, version)
 		})
 		It("builds a request with resource endpoint with resource id and 'version' query parameter", func() {
-			httpClientMock.EXPECT().Do(test.IsRequestURL(expectedURL)).Return(nil, errors.New("fake")).Times(1)
+			httpClientMock.EXPECT().Do(IsRequestURL(expectedURL)).Return(nil, errors.New("fake")).Times(1)
 
 			client.Delete(ctx, resources.Account, id, version)
 		})
@@ -88,9 +88,7 @@ var _ = Describe("Account api resource client DELETE method", func() {
 
 			Expect(err).Should(
 				MatchError(
-					ErrFromServer{"DELETE",
-						expectedURL,
-						500}),
+					NewErrFromServer("DELETE", expectedURL, 500)),
 			)
 		})
 	})
