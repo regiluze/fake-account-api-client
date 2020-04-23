@@ -24,7 +24,6 @@ var _ = Describe("Account api resource client CREATE method", func() {
 		client         *Form3Client
 		mockCtrl       *gomock.Controller
 		httpClientMock *MockHTTPClient
-		urlBuilder     URLBuilder
 		expectedURL    = fmt.Sprintf("%s/%v/organisation/accounts", baseURL, apiVersion)
 		ctx            = context.Background()
 	)
@@ -32,8 +31,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
-		urlBuilder = NewURLBuilder(baseURL, apiVersion)
-		client = NewForm3APIClient(urlBuilder, httpClientMock)
+		client = NewForm3APIClient(baseURL, apiVersion, httpClientMock)
 	})
 
 	Context("Building the request", func() {

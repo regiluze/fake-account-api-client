@@ -4,10 +4,9 @@ package test
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
-	"strconv"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,7 +17,6 @@ import (
 const (
 	invalidUUID       = "bd6f8-c1f2-11b2-b677-acd23cdde73c"
 	defaultVersion    = 0
-	mimeType          = "application/vnd.api+json"
 	defaultBaseURL    = "http://localhost:8080"
 	defaultApiVersion = "v1"
 )
@@ -44,13 +42,11 @@ var _ = Describe("Account API e2e test suite", func() {
 		apiClient *Form3Client
 		//apiClientWithTimeout *Form3Client
 		emptyFilter = map[string]interface{}{}
-		urlBuilder  URLBuilder
 		ctx         = context.Background()
 	)
 
 	BeforeEach(func() {
-		urlBuilder = NewURLBuilder(baseURL, apiVersion)
-		apiClient = NewForm3APIClientWithTimeout(mimeType, urlBuilder, 5*time.Second)
+		apiClient = NewForm3APIClient(baseURL, apiVersion, http.DefaultClient)
 	})
 
 	AfterSuite(func() {
@@ -135,7 +131,7 @@ var _ = Describe("Account API e2e test suite", func() {
 
 				resp, err = apiClient.Create(ctx, resources.Account, accountData)
 
-				expectedURL := urlBuilder.DoForResource(resources.Account)
+				expectedURL := fmt.Sprintf("%s/%s/organisation/accounts", baseURL, apiVersion)
 				Expect(resp).To(BeNil())
 				Expect(err).Should(
 					MatchError(
@@ -174,7 +170,7 @@ var _ = Describe("Account API e2e test suite", func() {
 					resp, err := apiClient.Fetch(ctx, resources.Account, accountID)
 
 					Expect(resp).To(BeNil())
-					expectedURL := urlBuilder.DoForResourceWithID(resources.Account, accountID)
+					expectedURL := fmt.Sprintf("%s/%s/organisation/accounts/%s", baseURL, apiVersion, accountID)
 					Expect(err).Should(
 						MatchError(
 							NewErrNotFound(
@@ -303,13 +299,8 @@ var _ = Describe("Account API e2e test suite", func() {
 						pageSize,
 					)
 
-					expectedURL := urlBuilder.DoForResourceWithParameters(
-						resources.Account,
-						map[string]string{
-							"page[number]": strconv.Itoa(pageNumber),
-							"page[size]":   strconv.Itoa(pageSize),
-						},
-					)
+					queryParameters := fmt.Sprintf("?page[number]=%d&page[size]=%d", pageNumber, pageSize)
+					expectedURL := fmt.Sprintf(fmt.Sprintf("%s/%s/organisation/accounts%s", baseURL, apiVersion, queryParameters))
 					Expect(resp).To(BeNil())
 					Expect(err).Should(
 						MatchError(

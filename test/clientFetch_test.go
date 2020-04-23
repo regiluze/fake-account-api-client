@@ -30,7 +30,6 @@ var _ = Describe("Account api resource client FETCH method", func() {
 		client         *Form3Client
 		mockCtrl       *gomock.Controller
 		httpClientMock *MockHTTPClient
-		urlBuilder     URLBuilder
 		expectedURL    = fmt.Sprintf("%s/%s/organisation/accounts/%s", baseURL, apiVersion, id)
 		ctx            = context.Background()
 	)
@@ -38,8 +37,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
-		urlBuilder = NewURLBuilder(baseURL, apiVersion)
-		client = NewForm3APIClient(urlBuilder, httpClientMock)
+		client = NewForm3APIClient(baseURL, apiVersion, httpClientMock)
 	})
 
 	Context("building request", func() {

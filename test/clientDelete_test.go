@@ -25,7 +25,6 @@ var _ = Describe("Account api resource client DELETE method", func() {
 		client         *Form3Client
 		mockCtrl       *gomock.Controller
 		httpClientMock *MockHTTPClient
-		urlBuilder     URLBuilder
 		expectedURL    = fmt.Sprintf("%s/%s/organisation/accounts/%s?version=%d", baseURL, apiVersion, id, version)
 		ctx            = context.Background()
 	)
@@ -33,8 +32,7 @@ var _ = Describe("Account api resource client DELETE method", func() {
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
-		urlBuilder = NewURLBuilder(baseURL, apiVersion)
-		client = NewForm3APIClient(urlBuilder, httpClientMock)
+		client = NewForm3APIClient(baseURL, apiVersion, httpClientMock)
 	})
 
 	Context("building request", func() {

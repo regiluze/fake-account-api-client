@@ -33,7 +33,6 @@ var _ = Describe("Account api resource client LIST method", func() {
 		mockCtrl        *gomock.Controller
 		httpClientMock  *MockHTTPClient
 		emptyFilter     map[string]interface{}
-		urlBuilder      URLBuilder
 		queryParameters = fmt.Sprintf("?page[number]=%d&page[size]=%d", pageNumber, pageSize)
 		expectedURL     = fmt.Sprintf(fmt.Sprintf("%s/%s/organisation/accounts%s", baseURL, apiVersion, queryParameters))
 		ctx             = context.Background()
@@ -42,8 +41,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 	BeforeEach(func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
-		urlBuilder = NewURLBuilder(baseURL, apiVersion)
-		client = NewForm3APIClient(urlBuilder, httpClientMock)
+		client = NewForm3APIClient(baseURL, apiVersion, httpClientMock)
 	})
 
 	Context("building request", func() {
