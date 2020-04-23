@@ -19,7 +19,6 @@ const (
 	invalidUUID       = "bd6f8-c1f2-11b2-b677-acd23cdde73c"
 	defaultVersion    = 0
 	mimeType          = "application/vnd.api+json"
-	authToken         = ""
 	defaultBaseURL    = "http://localhost:8080"
 	defaultApiVersion = "v1"
 )
@@ -51,7 +50,7 @@ var _ = Describe("Account API e2e test suite", func() {
 
 	BeforeEach(func() {
 		urlBuilder = NewURLBuilder(baseURL, apiVersion)
-		apiClient = NewForm3APIClientWithTimeout(mimeType, authToken, urlBuilder, 5*time.Second)
+		apiClient = NewForm3APIClientWithTimeout(mimeType, urlBuilder, 5*time.Second)
 	})
 
 	AfterSuite(func() {
