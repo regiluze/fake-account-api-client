@@ -6,10 +6,6 @@ import (
 	"github.com/regiluze/form3-account-api-client/resources"
 )
 
-var (
-	basicErrorAPIStatusCodes = [...]int{401, 403, 405, 406, 409, 429, 500, 502, 503, 504}
-)
-
 // ErrNotFound is returned when getting a 404 status code from server.
 type ErrNotFound struct {
 	url string
