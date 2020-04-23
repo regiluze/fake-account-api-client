@@ -1,4 +1,4 @@
-package form3apiclient
+package client
 
 import (
 	"bytes"

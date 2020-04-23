@@ -15,7 +15,7 @@ import (
 	. "github.com/onsi/ginkgo"
 
 	. "github.com/onsi/gomega"
-	. "github.com/regiluze/form3-account-api-client"
+	. "github.com/regiluze/form3-account-api-client/client"
 	"github.com/regiluze/form3-account-api-client/resources"
 )
 
