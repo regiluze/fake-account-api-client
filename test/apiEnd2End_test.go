@@ -15,25 +15,19 @@ import (
 )
 
 const (
-	invalidUUID       = "bd6f8-c1f2-11b2-b677-acd23cdde73c"
-	defaultVersion    = 0
-	defaultBaseURL    = "http://localhost:8080"
-	defaultApiVersion = "v1"
+	invalidUUID    = "bd6f8-c1f2-11b2-b677-acd23cdde73c"
+	defaultVersion = 0
+	defaultBaseURL = "http://localhost:8080/v1"
 )
 
 var (
-	baseURL    string
-	apiVersion string
+	baseURL string
 )
 
 func init() {
 	baseURL = os.Getenv("FORM3_API_BASE_URL")
 	if len(baseURL) == 0 {
 		baseURL = defaultBaseURL
-	}
-	apiVersion = os.Getenv("FORM3_API_VERSION")
-	if len(apiVersion) == 0 {
-		apiVersion = defaultApiVersion
 	}
 }
 
@@ -46,7 +40,7 @@ var _ = Describe("Account API e2e test suite", func() {
 	)
 
 	BeforeEach(func() {
-		apiClient = NewForm3APIClient(baseURL, apiVersion, http.DefaultClient)
+		apiClient = NewForm3APIClient(baseURL, http.DefaultClient)
 	})
 
 	AfterSuite(func() {
@@ -131,7 +125,7 @@ var _ = Describe("Account API e2e test suite", func() {
 
 				resp, err = apiClient.Create(ctx, resources.Account, accountData)
 
-				expectedURL := fmt.Sprintf("%s/%s/organisation/accounts", baseURL, apiVersion)
+				expectedURL := fmt.Sprintf("%s/organisation/accounts", baseURL)
 				Expect(resp).To(BeNil())
 				Expect(err).Should(
 					MatchError(
@@ -170,7 +164,7 @@ var _ = Describe("Account API e2e test suite", func() {
 					resp, err := apiClient.Fetch(ctx, resources.Account, accountID)
 
 					Expect(resp).To(BeNil())
-					expectedURL := fmt.Sprintf("%s/%s/organisation/accounts/%s", baseURL, apiVersion, accountID)
+					expectedURL := fmt.Sprintf("%s/organisation/accounts/%s", baseURL, accountID)
 					Expect(err).Should(
 						MatchError(
 							NewErrNotFound(
@@ -300,7 +294,7 @@ var _ = Describe("Account API e2e test suite", func() {
 					)
 
 					queryParameters := fmt.Sprintf("?page[number]=%d&page[size]=%d", pageNumber, pageSize)
-					expectedURL := fmt.Sprintf(fmt.Sprintf("%s/%s/organisation/accounts%s", baseURL, apiVersion, queryParameters))
+					expectedURL := fmt.Sprintf(fmt.Sprintf("%s/organisation/accounts%s", baseURL, queryParameters))
 					Expect(resp).To(BeNil())
 					Expect(err).Should(
 						MatchError(

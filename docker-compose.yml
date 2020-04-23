@@ -9,7 +9,7 @@ services:
       - accountapi
     command: ["make", "test"]
     environment: 
-      - FORM3_API_BASE_URL=http://accountapi:8080
+      - FORM3_API_BASE_URL=http://accountapi:8080/v1
   accountapi:
     image: form3tech/interview-accountapi:v1.0.0-4-g63cf8434
     restart: on-failure

@@ -23,10 +23,10 @@ type Form3Client struct {
 	urlBuilder URLBuilder
 }
 
-func NewForm3APIClient(baseURL, apiVersion string, httpClient HTTPClient) *Form3Client {
-	urlBuilder := NewURLBuilder(baseURL, apiVersion)
+func NewForm3APIClient(baseURL string, httpClient HTTPClient) *Form3Client {
+	urlBuilder := NewURLBuilder(baseURL)
 	if httpClient == nil {
-		httpClient = &http.Client{}
+		httpClient = http.DefaultClient
 	}
 	return &Form3Client{
 		httpClient: httpClient,

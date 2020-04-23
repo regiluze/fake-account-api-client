@@ -16,19 +16,17 @@ var (
 
 type URLBuilder struct {
 	baseURL string
-	version string
 }
 
-func NewURLBuilder(baseURL, version string) URLBuilder {
+func NewURLBuilder(baseURL string) URLBuilder {
 	return URLBuilder{
 		baseURL: baseURL,
-		version: version,
 	}
 }
 
 func (u URLBuilder) DoForResource(resourceName resources.ResourceName) string {
 	endpoint := resourcesEndpointsMap[resourceName]
-	return fmt.Sprintf("%s/%s/%s", u.baseURL, u.version, endpoint)
+	return fmt.Sprintf("%s/%s", u.baseURL, endpoint)
 }
 
 func (u URLBuilder) DoForResourceWithID(resourceName resources.ResourceName, id string) string {
