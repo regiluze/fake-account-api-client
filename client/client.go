@@ -12,6 +12,8 @@ import (
 	"github.com/regiluze/form3-account-api-client/resources"
 )
 
+const DefaultMimeType = "application/vnd.api+json"
+
 type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
@@ -19,33 +21,26 @@ type HTTPClient interface {
 type Form3Client struct {
 	httpClient HTTPClient
 	urlBuilder URLBuilder
-	mimeType   string
 }
 
-func NewForm3APIClient(mimeType string, urlBuilder URLBuilder, httpClient HTTPClient) *Form3Client {
+func NewForm3APIClient(urlBuilder URLBuilder, httpClient HTTPClient) *Form3Client {
 	if httpClient == nil {
 		httpClient = &http.Client{}
 	}
 	return &Form3Client{
 		httpClient: httpClient,
-		mimeType:   mimeType,
 		urlBuilder: urlBuilder,
 	}
 }
 
-func NewForm3APIClientWithTimeout(mimeType string, URLBuilder URLBuilder, timeout time.Duration) *Form3Client {
+func NewForm3APIClientWithTimeout(URLBuilder URLBuilder, timeout time.Duration) *Form3Client {
 	httpClient := &http.Client{
 		Timeout: timeout,
 	}
 	return &Form3Client{
 		httpClient: httpClient,
-		mimeType:   mimeType,
 		urlBuilder: URLBuilder,
 	}
-}
-
-func (fc *Form3Client) SetMimeType(mimeType string) {
-	fc.mimeType = mimeType
 }
 
 func (fc Form3Client) Create(ctx context.Context, resourceName resources.ResourceName, resource resources.Resource) (*resources.DataContainer, error) {
@@ -107,8 +102,8 @@ func (fc Form3Client) Delete(ctx context.Context, resourceName resources.Resourc
 }
 
 func (fc Form3Client) makeRequest(ctx context.Context, req *http.Request, responseData interface{}) error {
-	req.Header.Set("Accept", fc.mimeType)
-	req.Header.Set("Content-Type", fc.mimeType)
+	req.Header.Set("Accept", DefaultMimeType)
+	req.Header.Set("Content-Type", DefaultMimeType)
 	cReq := req.WithContext(ctx)
 
 	resp, err := fc.httpClient.Do(cReq)

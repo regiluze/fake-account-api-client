@@ -65,13 +65,8 @@ func IsRequestHeaderValues(r *http.Request) gomock.Matcher {
 
 func (i *isRequestHeaderValues) Matches(x interface{}) bool {
 	req := x.(*http.Request)
-	authorization := true
-	if len(i.r.Header["Authorization"]) > 0 {
-		authorization = req.Header["Authorization"][0] == i.r.Header["Authorization"][0]
-	}
 	return req.Header["Accept"][0] == i.r.Header["Accept"][0] &&
-		req.Header["Content-Type"][0] == i.r.Header["Content-Type"][0] &&
-		authorization
+		req.Header["Content-Type"][0] == i.r.Header["Content-Type"][0]
 }
 
 func (i *isRequestHeaderValues) String() string {

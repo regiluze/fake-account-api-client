@@ -20,13 +20,11 @@ import (
 )
 
 const (
-	pageNumber          = 0
-	pageSize            = 50
-	id2                 = "ad27e265-4402-3b3b-a0e3-6664ea9cc8dc"
-	organisationID2     = "eb0bd6f9-c3f5-44b2-b644-acd23cdde73c"
-	fakeMimeType        = "fakemimeType"
-	anotherFakeMimeType = "anotherfakemimeType"
-	apiVersion          = "1"
+	pageNumber      = 0
+	pageSize        = 50
+	id2             = "ad27e265-4402-3b3b-a0e3-6664ea9cc8dc"
+	organisationID2 = "eb0bd6f9-c3f5-44b2-b644-acd23cdde73c"
+	apiVersion      = "1"
 )
 
 var _ = Describe("Account api resource client LIST method", func() {
@@ -45,7 +43,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
 		urlBuilder = NewURLBuilder(baseURL, apiVersion)
-		client = NewForm3APIClient(fakeMimeType, urlBuilder, httpClientMock)
+		client = NewForm3APIClient(urlBuilder, httpClientMock)
 	})
 
 	Context("building request", func() {

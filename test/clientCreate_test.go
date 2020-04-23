@@ -33,7 +33,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 		mockCtrl = gomock.NewController(GinkgoT())
 		httpClientMock = NewMockHTTPClient(mockCtrl)
 		urlBuilder = NewURLBuilder(baseURL, apiVersion)
-		client = NewForm3APIClient(fakeMimeType, urlBuilder, httpClientMock)
+		client = NewForm3APIClient(urlBuilder, httpClientMock)
 	})
 
 	Context("Building the request", func() {
@@ -73,25 +73,8 @@ var _ = Describe("Account api resource client CREATE method", func() {
 				expectedURL,
 				bytes.NewBuffer(dataB),
 			)
-			req.Header.Set("Accept", fakeMimeType)
-			req.Header.Set("Content-Type", fakeMimeType)
-			httpClientMock.EXPECT().Do(IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
-
-			client.Create(ctx, resources.Account, accountData)
-		})
-		It("changes client headers setting different ones", func() {
-			accountData := BuildBasicAccountResource(id, organisationID)
-			data := resources.NewDataContainer(accountData)
-			dataB, _ := json.Marshal(data)
-			req, _ := http.NewRequest(
-				"POST",
-				expectedURL,
-				bytes.NewBuffer(dataB),
-			)
-			req.Header.Set("Accept", anotherFakeMimeType)
-			req.Header.Set("Content-Type", anotherFakeMimeType)
-			client.SetMimeType(anotherFakeMimeType)
-
+			req.Header.Set("Accept", DefaultMimeType)
+			req.Header.Set("Content-Type", DefaultMimeType)
 			httpClientMock.EXPECT().Do(IsRequestHeaderValues(req)).Return(nil, errors.New("fake")).Times(1)
 
 			client.Create(ctx, resources.Account, accountData)
