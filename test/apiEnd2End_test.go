@@ -4,7 +4,9 @@ package test
 
 import (
 	"context"
+	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -14,24 +16,12 @@ import (
 )
 
 const (
-	ukAccountID          = "ad27e266-9605-4b4b-a0e5-4443ea8cc4dc"
-	ukAccountID2         = "ad69e555-2202-3b3b-a0e5-3004ea9cc8dc"
-	ukAccountID3         = "ad96e666-1102-3b3b-a0e5-3004ea9cc8dc"
-	ukAccountID4         = "ad95e777-3402-3b3b-a0e5-3004ea9cc8dc"
-	ukAccountID5         = "ad95e888-3502-3b3b-a0e5-3004ea9cc8dc"
-	ukAccountID6         = "ad95e999-3602-3b3b-a0e5-3004ea9cc8dc"
-	ukAccountID7         = "ad93e777-3702-3b3b-a0e5-3004ea9cc8dc"
-	ukOrganisationID     = "eb0bd6f5-c2f5-44b2-b677-acd23cdde73c"
-	wrongUkAccountID     = "eb0bd6f9-c1f5-11b2-b677-acd23cdde73c"
-	notExistsUkAccountID = "eb0bd6f8-c4f1-11b2-b677-acd23cdde73c"
-	invalidUUID          = "bd6f8-c1f2-11b2-b677-acd23cdde73c"
-
-	australiaOrganisationID = "eb0bd2f4-c3f5-44b2-b677-acd23cdde73c"
-	version                 = 0
-	mimeType                = "application/vnd.api+json"
-	authToken               = ""
-	defaultBaseURL          = "http://localhost:8080"
-	defaultApiVersion       = "v1"
+	invalidUUID       = "bd6f8-c1f2-11b2-b677-acd23cdde73c"
+	defaultVersion    = 0
+	mimeType          = "application/vnd.api+json"
+	authToken         = ""
+	defaultBaseURL    = "http://localhost:8080"
+	defaultApiVersion = "v1"
 )
 
 var (
@@ -52,87 +42,74 @@ func init() {
 
 var _ = Describe("Account API e2e test suite", func() {
 	var (
-		apiClient            *Form3Client
-		apiClientWithTimeout *Form3Client
-		emptyFilter          = map[string]interface{}{}
-		urlBuilder           URLBuilder
-		ctx                  = context.Background()
+		apiClient *Form3Client
+		//apiClientWithTimeout *Form3Client
+		emptyFilter = map[string]interface{}{}
+		urlBuilder  URLBuilder
+		ctx         = context.Background()
 	)
 
-	BeforeSuite(func() {
+	BeforeEach(func() {
 		urlBuilder = NewURLBuilder(baseURL, apiVersion)
 		apiClient = NewForm3APIClientWithTimeout(mimeType, authToken, urlBuilder, 5*time.Second)
-
-		// set the repository
-		accountData := BuildUKAccountWithCoP(ukAccountID3, ukOrganisationID)
-		_, err := apiClient.Create(ctx, resources.Account, accountData)
-		Expect(err).To(BeNil())
-		accountData1 := BuildUKAccountWithCoP(ukAccountID4, ukOrganisationID)
-		_, err = apiClient.Create(ctx, resources.Account, accountData1)
-		Expect(err).To(BeNil())
-		accountData2 := BuildUKAccountWithCoP(ukAccountID5, ukOrganisationID)
-		_, err = apiClient.Create(ctx, resources.Account, accountData2)
-		Expect(err).To(BeNil())
-		accountData3 := BuildUKAccountWithCoP(ukAccountID6, ukOrganisationID)
-		_, err = apiClient.Create(ctx, resources.Account, accountData3)
-		Expect(err).To(BeNil())
-		accountData4 := BuildUKAccountWithCoP(ukAccountID7, ukOrganisationID)
-		_, err = apiClient.Create(ctx, resources.Account, accountData4)
-		Expect(err).To(BeNil())
 	})
 
 	AfterSuite(func() {
-		// Clean repository
-		err := apiClient.Delete(ctx, resources.Account, ukAccountID, version)
-		Expect(err).To(BeNil())
-		err = apiClient.Delete(ctx, resources.Account, ukAccountID2, version)
-		Expect(err).To(BeNil())
-		err = apiClient.Delete(ctx, resources.Account, ukAccountID3, version)
-		Expect(err).To(BeNil())
-		err = apiClient.Delete(ctx, resources.Account, ukAccountID4, version)
-		Expect(err).To(BeNil())
-		err = apiClient.Delete(ctx, resources.Account, ukAccountID5, version)
-		Expect(err).To(BeNil())
-		err = apiClient.Delete(ctx, resources.Account, ukAccountID6, version)
-		Expect(err).To(BeNil())
 	})
 
 	Describe("Account resource operations", func() {
-		Context("Timeout", func() {
-			It("returns an error when request return status code is Timeout", func() {
-				apiClientWithTimeout = NewForm3APIClientWithTimeout(mimeType, authToken, urlBuilder, 1*time.Millisecond)
+		//Context("Timeout", func() {
+		//	It("returns an error when request return status code is Timeout", func() {
+		//		apiClientWithTimeout = NewForm3APIClientWithTimeout(mimeType, authToken, urlBuilder, 1*time.Millisecond)
 
-				_, err := apiClientWithTimeout.Fetch(ctx, resources.Account, ukAccountID3)
+		//		_, err := apiClientWithTimeout.Fetch(ctx, resources.Account, ukAccountID3)
 
-				Expect(err).NotTo(BeNil())
-			})
-		})
+		//		Expect(err).NotTo(BeNil())
+		//	})
+		//})
 		Context("Create", func() {
 			It("creates a UK account without CoP (non SEPA Indirect) and return the new account data with links", func() {
-				accountData := BuildUKAccountWithoutCoP(ukAccountID, ukOrganisationID)
+				ukAccountID, ukOrganisationID, err := BuildRandomUUIDs()
+				Expect(err).To(BeNil())
 
-				resp, err := apiClient.Create(ctx, resources.Account, accountData)
+				resp, err := apiClient.Create(
+					ctx,
+					resources.Account,
+					BuildUKAccountWithoutCoP(ukAccountID, ukOrganisationID),
+				)
 
 				Expect(err).To(BeNil())
 				Expect(resp.Data.ID).To(Equal(ukAccountID))
 				Expect(resp.Links).NotTo(BeEmpty())
-
+				err = apiClient.Delete(ctx, resources.Account, ukAccountID, defaultVersion)
+				Expect(err).To(BeNil())
 			})
 			It("creates a UK account with CoP (non SEPA Indirect) and return the new account data with links", func() {
-				accountData := BuildUKAccountWithCoP(ukAccountID2, ukOrganisationID)
+				ukAccountID, ukOrganisationID, err := BuildRandomUUIDs()
+				Expect(err).To(BeNil())
 
-				resp, err := apiClient.Create(ctx, resources.Account, accountData)
+				resp, err := apiClient.Create(
+					ctx,
+					resources.Account,
+					BuildUKAccountWithCoP(ukAccountID, ukOrganisationID),
+				)
 
 				Expect(err).To(BeNil())
-				Expect(resp.Data.ID).To(Equal(ukAccountID2))
+				Expect(resp.Data.ID).To(Equal(ukAccountID))
 				Expect(resp.Links).NotTo(BeEmpty())
-
+				err = apiClient.Delete(ctx, resources.Account, ukAccountID, defaultVersion)
+				Expect(err).To(BeNil())
 			})
-			Context("Bad Request", func() {
-				It("returns Bad Request status code when missing country", func() {
-					accountData := BuildUKSampleAccountWithoutCountry(wrongUkAccountID, ukOrganisationID)
+			Context("unhappy path", func() {
+				It("returns ErrBadRequest error when missing country account attributes", func() {
+					ukAccountID, ukOrganisationID, err := BuildRandomUUIDs()
+					Expect(err).To(BeNil())
 
-					resp, err := apiClient.Create(ctx, resources.Account, accountData)
+					resp, err := apiClient.Create(
+						ctx,
+						resources.Account,
+						BuildUKSampleAccountWithoutCountry(ukAccountID, ukOrganisationID),
+					)
 
 					Expect(resp).To(BeNil())
 					Expect(err).Should(
@@ -146,22 +123,59 @@ var _ = Describe("Account API e2e test suite", func() {
 					)
 				})
 			})
+			It("returns ErrFromServer error when account id already exists", func() {
+				ukAccountID, ukOrganisationID, err := BuildRandomUUIDs()
+				Expect(err).To(BeNil())
+				accountData := BuildUKAccountWithCoP(ukAccountID, ukOrganisationID)
+				resp, err := apiClient.Create(
+					ctx,
+					resources.Account,
+					accountData,
+				)
+				Expect(err).To(BeNil())
+
+				resp, err = apiClient.Create(ctx, resources.Account, accountData)
+
+				expectedURL := urlBuilder.DoForResource(resources.Account)
+				Expect(resp).To(BeNil())
+				Expect(err).Should(
+					MatchError(
+						NewErrFromServer(
+							"POST",
+							expectedURL,
+							http.StatusConflict,
+						)),
+				)
+				err = apiClient.Delete(ctx, resources.Account, ukAccountID, defaultVersion)
+				Expect(err).To(BeNil())
+			})
 		})
 		Context("Fetch", func() {
 			It("fetch an account with provided 'id' parameter", func() {
+				ukAccountID, ukOrganisationID, err := BuildRandomUUIDs()
+				Expect(err).To(BeNil())
+				resp, err := apiClient.Create(
+					ctx,
+					resources.Account,
+					BuildUKAccountWithoutCoP(ukAccountID, ukOrganisationID),
+				)
 
-				resp, err := apiClient.Fetch(ctx, resources.Account, ukAccountID3)
+				resp, err = apiClient.Fetch(ctx, resources.Account, ukAccountID)
 
 				Expect(err).To(BeNil())
-				Expect(resp.Data.ID).To(Equal(ukAccountID3))
-
+				Expect(resp.Data.ID).To(Equal(ukAccountID))
+				err = apiClient.Delete(ctx, resources.Account, ukAccountID, defaultVersion)
+				Expect(err).To(BeNil())
 			})
-			Context("Error from server", func() {
-				It("returns an error when account not found", func() {
-					resp, err := apiClient.Fetch(ctx, resources.Account, notExistsUkAccountID)
+			Context("unhappy path", func() {
+				It("returns ErrNotFound error when account id not found", func() {
+					accountID, _, err := BuildRandomUUIDs()
+					Expect(err).To(BeNil())
+
+					resp, err := apiClient.Fetch(ctx, resources.Account, accountID)
 
 					Expect(resp).To(BeNil())
-					expectedURL := urlBuilder.DoForResourceWithID(resources.Account, notExistsUkAccountID)
+					expectedURL := urlBuilder.DoForResourceWithID(resources.Account, accountID)
 					Expect(err).Should(
 						MatchError(
 							NewErrNotFound(
@@ -186,7 +200,31 @@ var _ = Describe("Account API e2e test suite", func() {
 			})
 		})
 		Context("List", func() {
-			It("returns a collection of accounts", func() {
+			It("returns a collection of 3 accounts when page size is 3", func() {
+				ukAccountID1, ukOrganisationID1, err := BuildRandomUUIDs()
+				Expect(err).To(BeNil())
+				_, err = apiClient.Create(
+					ctx,
+					resources.Account,
+					BuildUKAccountWithoutCoP(ukAccountID1, ukOrganisationID1),
+				)
+				Expect(err).To(BeNil())
+				ukAccountID2, ukOrganisationID2, err := BuildRandomUUIDs()
+				Expect(err).To(BeNil())
+				_, err = apiClient.Create(
+					ctx,
+					resources.Account,
+					BuildUKAccountWithoutCoP(ukAccountID2, ukOrganisationID2),
+				)
+				Expect(err).To(BeNil())
+				ukAccountID3, ukOrganisationID3, err := BuildRandomUUIDs()
+				Expect(err).To(BeNil())
+				_, err = apiClient.Create(
+					ctx,
+					resources.Account,
+					BuildUKAccountWithoutCoP(ukAccountID3, ukOrganisationID3),
+				)
+				Expect(err).To(BeNil())
 
 				pageNumber := 0
 				pageSize := 3
@@ -199,27 +237,119 @@ var _ = Describe("Account API e2e test suite", func() {
 				)
 
 				Expect(err).To(BeNil())
-				Expect(len(resp.Data)).To(Equal(pageSize))
+				Expect(resp.Data[0].ID).To(Equal(ukAccountID1))
+				Expect(resp.Data[1].ID).To(Equal(ukAccountID2))
+				Expect(resp.Data[2].ID).To(Equal(ukAccountID3))
+				err = apiClient.Delete(ctx, resources.Account, ukAccountID1, defaultVersion)
+				Expect(err).To(BeNil())
+				err = apiClient.Delete(ctx, resources.Account, ukAccountID2, defaultVersion)
+				Expect(err).To(BeNil())
+				err = apiClient.Delete(ctx, resources.Account, ukAccountID3, defaultVersion)
+				Expect(err).To(BeNil())
+			})
+			It("returns second account when page size is 1 and number 0 when there are 3 accounts", func() {
+				ukAccountID1, ukOrganisationID1, err := BuildRandomUUIDs()
+				Expect(err).To(BeNil())
+				_, err = apiClient.Create(
+					ctx,
+					resources.Account,
+					BuildUKAccountWithoutCoP(ukAccountID1, ukOrganisationID1),
+				)
+				Expect(err).To(BeNil())
+				ukAccountID2, ukOrganisationID2, err := BuildRandomUUIDs()
+				Expect(err).To(BeNil())
+				_, err = apiClient.Create(
+					ctx,
+					resources.Account,
+					BuildUKAccountWithoutCoP(ukAccountID2, ukOrganisationID2),
+				)
+				Expect(err).To(BeNil())
+				ukAccountID3, ukOrganisationID3, err := BuildRandomUUIDs()
+				Expect(err).To(BeNil())
+				_, err = apiClient.Create(
+					ctx,
+					resources.Account,
+					BuildUKAccountWithoutCoP(ukAccountID3, ukOrganisationID3),
+				)
+				Expect(err).To(BeNil())
+
+				pageNumber := 1
+				pageSize := 1
+				resp, err := apiClient.List(
+					ctx,
+					resources.Account,
+					emptyFilter,
+					pageNumber,
+					pageSize,
+				)
+
+				Expect(err).To(BeNil())
+				Expect(resp.Data[0].ID).To(Equal(ukAccountID2))
+				err = apiClient.Delete(ctx, resources.Account, ukAccountID1, defaultVersion)
+				Expect(err).To(BeNil())
+				err = apiClient.Delete(ctx, resources.Account, ukAccountID2, defaultVersion)
+				Expect(err).To(BeNil())
+				err = apiClient.Delete(ctx, resources.Account, ukAccountID3, defaultVersion)
+				Expect(err).To(BeNil())
+			})
+			Context("unhappy path", func() {
+				It("returns ErrFromServer error when page number and size are negative numbers", func() {
+					pageNumber := -1
+					pageSize := -1
+					resp, err := apiClient.List(
+						ctx,
+						resources.Account,
+						emptyFilter,
+						pageNumber,
+						pageSize,
+					)
+
+					expectedURL := urlBuilder.DoForResourceWithParameters(
+						resources.Account,
+						map[string]string{
+							"page[number]": strconv.Itoa(pageNumber),
+							"page[size]":   strconv.Itoa(pageSize),
+						},
+					)
+					Expect(resp).To(BeNil())
+					Expect(err).Should(
+						MatchError(
+							NewErrFromServer(
+								"GET",
+								expectedURL,
+								http.StatusInternalServerError,
+							)),
+					)
+				})
 
 			})
 		})
 		Context("Delete", func() {
 			It("delete an account with provided 'id' parameter", func() {
+				ukAccountID, ukOrganisationID, err := BuildRandomUUIDs()
+				Expect(err).To(BeNil())
+				_, err = apiClient.Create(
+					ctx,
+					resources.Account,
+					BuildUKAccountWithCoP(ukAccountID, ukOrganisationID),
+				)
 
-				err := apiClient.Delete(ctx, resources.Account, ukAccountID7, version)
+				err = apiClient.Delete(ctx, resources.Account, ukAccountID, defaultVersion)
 
 				Expect(err).To(BeNil())
 			})
-			Context("Error from server", func() {
-				It("returns nil error when account id not exists", func() {
+			It("returns nil error when account id not exists", func() {
+				ukAccountID, _, err := BuildRandomUUIDs()
+				Expect(err).To(BeNil())
 
-					err := apiClient.Delete(ctx, resources.Account, notExistsUkAccountID, version)
+				err = apiClient.Delete(ctx, resources.Account, ukAccountID, defaultVersion)
 
-					Expect(err).To(BeNil())
-				})
-				It("returns an error when getting Bad Request status code", func() {
+				Expect(err).To(BeNil())
+			})
+			Context("unhappy path", func() {
+				It("returns ErrBadRequest error when account id is invalid", func() {
 
-					err := apiClient.Delete(ctx, resources.Account, invalidUUID, version)
+					err := apiClient.Delete(ctx, resources.Account, invalidUUID, defaultVersion)
 
 					Expect(err).Should(
 						MatchError(

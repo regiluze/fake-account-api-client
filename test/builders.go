@@ -1,8 +1,21 @@
 package test
 
 import (
+	"github.com/google/uuid"
 	"github.com/regiluze/form3-account-api-client/resources"
 )
+
+func BuildRandomUUIDs() (string, string, error) {
+	accountUUID, err := uuid.NewRandom()
+	if err != nil {
+		return "", "", err
+	}
+	organisationUUID, err := uuid.NewRandom()
+	if err != nil {
+		return "", "", err
+	}
+	return accountUUID.String(), organisationUUID.String(), nil
+}
 
 func BuildBasicAccountResource(id, organisationID string) resources.Resource {
 	return resources.NewAccount(id, organisationID, map[string]interface{}{})
