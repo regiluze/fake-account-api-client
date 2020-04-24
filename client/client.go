@@ -51,7 +51,10 @@ func (fc Form3Client) Create(ctx context.Context, resourceName resources.Resourc
 		return nil, err
 	}
 	url := fc.urlBuilder.DoForResource(resourceName)
-	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataB))
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(dataB))
+	if err != nil {
+		return nil, err
+	}
 
 	responseData := &resources.DataContainer{}
 	if err := fc.makeRequest(ctx, req, responseData); err != nil {
@@ -62,7 +65,10 @@ func (fc Form3Client) Create(ctx context.Context, resourceName resources.Resourc
 
 func (fc Form3Client) Fetch(ctx context.Context, resourceName resources.ResourceName, id string) (*resources.DataContainer, error) {
 	url := fc.urlBuilder.DoForResourceWithID(resourceName, id)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
 
 	responseData := &resources.DataContainer{}
 	if err := fc.makeRequest(ctx, req, responseData); err != nil {
@@ -80,7 +86,10 @@ func (fc Form3Client) List(ctx context.Context, resourceName resources.ResourceN
 			// TODO add the filter query parameter
 		},
 	)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
 
 	responseData := &resources.ListDataContainer{}
 	if err := fc.makeRequest(ctx, req, responseData); err != nil {
@@ -97,7 +106,10 @@ func (fc Form3Client) Delete(ctx context.Context, resourceName resources.Resourc
 			"version": strconv.Itoa(version),
 		},
 	)
-	req, _ := http.NewRequest(http.MethodDelete, url, nil)
+	req, err := http.NewRequest(http.MethodDelete, url, nil)
+	if err != nil {
+		return err
+	}
 
 	return fc.makeRequest(ctx, req, nil)
 }
