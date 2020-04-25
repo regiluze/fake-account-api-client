@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/regiluze/form3-account-api-client/resources"
 )
@@ -31,16 +30,6 @@ func NewForm3APIClient(baseURL string, httpClient HTTPClient) *Form3Client {
 	return &Form3Client{
 		httpClient: httpClient,
 		urlBuilder: urlBuilder,
-	}
-}
-
-func NewForm3APIClientWithTimeout(URLBuilder URLBuilder, timeout time.Duration) *Form3Client {
-	httpClient := &http.Client{
-		Timeout: timeout,
-	}
-	return &Form3Client{
-		httpClient: httpClient,
-		urlBuilder: URLBuilder,
 	}
 }
 

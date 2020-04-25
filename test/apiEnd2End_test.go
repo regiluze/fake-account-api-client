@@ -33,8 +33,7 @@ func init() {
 
 var _ = Describe("Account API e2e test suite", func() {
 	var (
-		apiClient *Form3Client
-		//apiClientWithTimeout *Form3Client
+		apiClient   *Form3Client
 		emptyFilter = map[string]interface{}{}
 		ctx         = context.Background()
 	)
@@ -47,15 +46,6 @@ var _ = Describe("Account API e2e test suite", func() {
 	})
 
 	Describe("Account resource operations", func() {
-		//Context("Timeout", func() {
-		//	It("returns an error when request return status code is Timeout", func() {
-		//		apiClientWithTimeout = NewForm3APIClientWithTimeout(mimeType, authToken, urlBuilder, 1*time.Millisecond)
-
-		//		_, err := apiClientWithTimeout.Fetch(ctx, resources.Account, ukAccountID3)
-
-		//		Expect(err).NotTo(BeNil())
-		//	})
-		//})
 		Context("Create", func() {
 			It("creates a UK account without CoP (non SEPA Indirect) and return the new account data with links", func() {
 				ukAccountID, ukOrganisationID, err := BuildRandomUUIDs()
