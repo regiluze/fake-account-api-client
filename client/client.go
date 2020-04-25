@@ -12,6 +12,13 @@ import (
 
 const DefaultMimeType = "application/vnd.api+json"
 
+type Client interface {
+	Fetch(ctx context.Context, resourceName resources.ResourceName, id string) (*resources.DataContainer, error)
+	Create(ctx context.Context, resourceName resources.ResourceName, resource resources.Resource) (*resources.DataContainer, error)
+	List(ctx context.Context, resourceName resources.ResourceName, filter map[string]interface{}, pageNumber, pageSize int) (*resources.ListDataContainer, error)
+	Delete(ctx context.Context, resourceName resources.ResourceName, id string, version int) error
+}
+
 type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
