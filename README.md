@@ -52,11 +52,7 @@ Create new Account resource example:
     accountData := resources.NewAccount(id, organisationID, accountAttributes)
     data := resources.NewDataContainer(accountData)
 
-		resp, err := client.Create(
-			context.Background(),
-      resources.Account,
-      data,
-		)
+    resp, err := client.Create(context.Background(), resources.Account, data)
 ```
 
 
