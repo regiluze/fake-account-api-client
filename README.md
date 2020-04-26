@@ -12,10 +12,53 @@
 
 ## Tests execution
 
+Used libraries:
+
+- Ginkgo: BDD testing library.
+- Gomega: Matcher library.
+- Gomock: Mocking library.
+- Google uuid: Library used to generate random uuid values.
+
+Before run tests, install testing library dependencies:
+```
+make deps 
+```
 Unit tests
 ```
 make unitTest
 ```
+End2end tests
+```
+make e2eTest
+```
+
+## Client use example
+
+Create new Account resource example:
+
+```go
+    baseURL := "https://api.form3.tech//v1"
+    client := NewForm3APIClient(baseURL, http.DefaultClient)
+    
+    id := "account-uuid"
+    organisationID := "organisation-uuid"
+    accountAttributes := map[string]interface{}{
+		"country":       "GB",
+		"base_currency": "GBP",
+		"bank_id":       "400300",
+		"bank_id_code":  "GBDSC",
+		"bic":           "NWBKGB22",
+	}
+    accountData := resources.NewAccount(id, organisationID, accountAttributes)
+    data := resources.NewDataContainer(accountData)
+
+		resp, err := client.Create(
+			context.Background(),
+      resources.Account,
+      data,
+		)
+```
+
 
 * document technical decisions
   * ginkgo as BDD testing library because it's a good tool to write more readable test

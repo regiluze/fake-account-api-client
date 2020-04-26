@@ -42,9 +42,6 @@ var _ = Describe("Account API e2e test suite", func() {
 		apiClient = NewForm3APIClient(baseURL, http.DefaultClient)
 	})
 
-	AfterSuite(func() {
-	})
-
 	Describe("Account resource operations", func() {
 		Context("Create", func() {
 			It("creates a UK account without CoP (non SEPA Indirect) and return the new account data with links", func() {
