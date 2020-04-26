@@ -13,7 +13,8 @@
 ## Tests execution
 
 Unit tests
-``` make unitTest
+```
+make unitTest
 ```
 
 * document technical decisions
