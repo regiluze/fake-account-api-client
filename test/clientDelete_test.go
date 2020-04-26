@@ -86,7 +86,7 @@ var _ = Describe("Account api resource client DELETE method", func() {
 
 			Expect(err).Should(
 				MatchError(
-					NewErrFromServer("DELETE", expectedURL, 500)),
+					NewErrResponseStatusCode("DELETE", expectedURL, 500)),
 			)
 		})
 	})

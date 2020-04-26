@@ -43,7 +43,7 @@ func (fc Form3Client) isResponseStatusCodeAnError(resp *http.Response, method, u
 		return fc.buildBadRequestError(method, resp)
 	}
 	if resp.StatusCode > http.StatusBadRequest {
-		return NewErrFromServer(method, url, resp.StatusCode)
+		return NewErrResponseStatusCode(method, url, resp.StatusCode)
 	}
 	return nil
 }

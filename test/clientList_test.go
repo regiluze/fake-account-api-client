@@ -124,7 +124,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 			Expect(response).To(BeNil())
 			Expect(err).Should(
 				MatchError(
-					NewErrFromServer("GET", expectedURL, 500)),
+					NewErrResponseStatusCode("GET", expectedURL, 500)),
 			)
 		})
 		It("returns ErrNotFound error when server responses an error 40X", func() {
@@ -140,7 +140,7 @@ var _ = Describe("Account api resource client LIST method", func() {
 			Expect(response).To(BeNil())
 			Expect(err).Should(
 				MatchError(
-					NewErrFromServer("GET", expectedURL, 409)),
+					NewErrResponseStatusCode("GET", expectedURL, 409)),
 			)
 		})
 	})

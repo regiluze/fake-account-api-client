@@ -114,7 +114,7 @@ var _ = Describe("Account API e2e test suite", func() {
 				Expect(resp).To(BeNil())
 				Expect(err).Should(
 					MatchError(
-						NewErrFromServer(
+						NewErrResponseStatusCode(
 							"POST",
 							expectedURL,
 							http.StatusConflict,
@@ -223,7 +223,7 @@ var _ = Describe("Account API e2e test suite", func() {
 					Expect(resp).To(BeNil())
 					Expect(err).Should(
 						MatchError(
-							NewErrFromServer(
+							NewErrResponseStatusCode(
 								"GET",
 								expectedURL,
 								http.StatusInternalServerError,

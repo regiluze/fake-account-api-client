@@ -143,7 +143,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(
-				MatchError(NewErrFromServer("POST", expectedURL, 500)),
+				MatchError(NewErrResponseStatusCode("POST", expectedURL, 500)),
 			)
 		})
 		It("returns an error when server responses an error 40X", func() {
@@ -159,7 +159,7 @@ var _ = Describe("Account api resource client CREATE method", func() {
 
 			Expect(response).To(BeNil())
 			Expect(err).Should(
-				MatchError(NewErrFromServer("POST", expectedURL, 403)),
+				MatchError(NewErrResponseStatusCode("POST", expectedURL, 403)),
 			)
 		})
 		It("returns an error with information to indentify the problem when server responses an error 400", func() {

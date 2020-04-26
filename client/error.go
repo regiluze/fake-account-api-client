@@ -50,10 +50,10 @@ func (e ErrBadRequest) getErrorData() resources.BadRequestData {
 type ErrResponseStatusCode struct {
 	method     string
 	url        string
-	statusCode int
+	StatusCode int
 }
 
-func NewErrFromServer(method, url string, statusCode int) error {
+func NewErrResponseStatusCode(method, url string, statusCode int) error {
 	return ErrResponseStatusCode{method, url, statusCode}
 }
 
@@ -62,6 +62,6 @@ func (e ErrResponseStatusCode) Error() string {
 		"Error requesting (%s, %s): Status code %d",
 		e.method,
 		e.url,
-		e.statusCode,
+		e.StatusCode,
 	)
 }

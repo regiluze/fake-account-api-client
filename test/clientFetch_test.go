@@ -115,7 +115,7 @@ var _ = Describe("Account api resource client FETCH method", func() {
 			Expect(response).To(BeNil())
 			Expect(err).Should(
 				MatchError(
-					NewErrFromServer("GET", expectedURL, 500)),
+					NewErrResponseStatusCode("GET", expectedURL, 500)),
 			)
 		})
 		It("returns ErrNotFound error when server responses an error 404", func() {
