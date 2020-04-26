@@ -6,7 +6,7 @@ import (
 	"github.com/regiluze/form3-account-api-client/resources"
 )
 
-// ErrNotFound is returned when getting a 404 status code from server.
+// ErrNotFound is returned when getting a 404 status code.
 type ErrNotFound struct {
 	url string
 }
@@ -22,7 +22,7 @@ func (e ErrNotFound) Error() string {
 	)
 }
 
-// ErrBadRequest is returned when getting a 400 status code from server.
+// ErrBadRequest is returned when getting a 400 status code.
 type ErrBadRequest struct {
 	method    string
 	errorData resources.BadRequestData
@@ -45,18 +45,19 @@ func (e ErrBadRequest) getErrorData() resources.BadRequestData {
 	return e.errorData
 }
 
-// ErrFromServer is returned when getting a 500 status code from server.
-type ErrFromServer struct {
+// ErrResponseStatusCode is returned when getting a 50X and 40X status codes,
+// less for 400 and 404 status codes.
+type ErrResponseStatusCode struct {
 	method     string
 	url        string
 	statusCode int
 }
 
 func NewErrFromServer(method, url string, statusCode int) error {
-	return ErrFromServer{method, url, statusCode}
+	return ErrResponseStatusCode{method, url, statusCode}
 }
 
-func (e ErrFromServer) Error() string {
+func (e ErrResponseStatusCode) Error() string {
 	return fmt.Sprintf(
 		"Error requesting (%s, %s): Status code %d",
 		e.method,

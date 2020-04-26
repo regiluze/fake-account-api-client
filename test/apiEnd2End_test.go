@@ -100,7 +100,7 @@ var _ = Describe("Account API e2e test suite", func() {
 					)
 				})
 			})
-			It("returns ErrFromServer error when account id already exists", func() {
+			It("returns ErrResponseStatusCode error when account id already exists", func() {
 				ukAccountID, ukOrganisationID, err := BuildRandomUUIDs()
 				Expect(err).To(BeNil())
 				accountData := BuildUKAccountWithCoP(ukAccountID, ukOrganisationID)
@@ -210,7 +210,7 @@ var _ = Describe("Account API e2e test suite", func() {
 				defer removeResources(ctx, apiClient, ukAccountID1, ukAccountID2, ukAccountID3)
 			})
 			Context("unhappy path", func() {
-				It("returns ErrFromServer error when page number and size are negative numbers", func() {
+				It("returns ErrResponseStatusCode error when page number and size are negative numbers", func() {
 					pageNumber := -1
 					pageSize := -1
 					resp, err := apiClient.List(
