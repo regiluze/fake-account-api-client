@@ -74,5 +74,6 @@ Create new Account resource example:
 
 - The rest of the resource methods and List filter feature.
 - Timeout: Add init client method with timeout parameter to create a http client setting this parameter.
-- Retry logic
-- Authentication
+- Retry logic.
+- Authentication.
+- Use env variables to set the base URL value.
