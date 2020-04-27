@@ -27,7 +27,7 @@ Unit tests
 ```
 make unitTest
 ```
-End2end tests
+End2end tests (before running this job the docker-compose should be running)
 ```
 make e2eTest
 ```
