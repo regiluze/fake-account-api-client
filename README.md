@@ -1,8 +1,8 @@
 *Form3 exercise*
 # Interview *accountapi*
 
- A client library in Go to access Form 3 fake account API service. Form 3 interview process exercise solution by Ruben Eguiluz.
-
+ A client library in Go to access to a fake account API service.
+ 
 ## What's included
 
 - The API client implementation, forlder client. 
