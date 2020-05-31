@@ -1,5 +1,5 @@
-*Form3 exercise*
-# Interview *accountapi*
+
+# *accountapi*
 
  A client library in Go to access to a fake account API service.
  
